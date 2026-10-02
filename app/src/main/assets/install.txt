@@ -1,0 +1,52 @@
+INSTALLATION + LEARNING PATH
+============================
+
+1) TERMUX SIDE
+pkg update
+pkg upgrade
+pkg install git curl wget python openssh
+termux-setup-storage
+
+2) KALI / NETHUNTER SIDE
+Inside Kali:
+sudo apt update
+sudo apt full-upgrade
+
+3) SEE AVAILABLE KALI TOOL GROUPS
+apt search '^kali-tools-'
+
+4) READ BEFORE INSTALLING
+apt show kali-tools-top10
+apt show kali-tools-information-gathering
+apt show kali-tools-web
+
+5) RECOMMENDED ORDER
+sudo apt install kali-tools-top10
+sudo apt install kali-tools-information-gathering
+sudo apt install kali-tools-vulnerability
+sudo apt install kali-tools-web
+sudo apt install kali-tools-forensics
+sudo apt install kali-tools-reporting
+
+6) STORAGE WARNING
+Do not start with kali-linux-everything on a phone unless you deliberately want a huge install and have enough storage and bandwidth. Category installs are easier to learn and repair.
+
+7) VERIFY A TOOL
+which nmap
+nmap --version
+nmap --help
+
+8) UPDATE LATER
+sudo apt update
+sudo apt upgrade
+
+9) REMOVE A TOOL
+sudo apt remove <package>
+
+10) CLEAN UNUSED PACKAGES
+sudo apt autoremove
+
+11) LEARNING ORDER
+Linux shell -> networking -> HTTP/DNS -> Nmap -> packet analysis -> web proxy -> vulnerability analysis -> password auditing -> forensics -> reverse engineering -> reporting.
+
+Always practice against localhost, your own devices, or an explicitly authorized lab.

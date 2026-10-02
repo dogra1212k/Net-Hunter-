@@ -2,10 +2,11 @@
     <string name="app_name">Net Hunter Guide</string>
     <string name="logo_description">Net Hunter N logo</string>
     <string name="title">Net Hunter</string>
-    <string name="subtitle">Termux + Kali NetHunter learning companion</string>
-    <string name="quick_start">Quick start\n\nTermux:\npkg update\npkg install git curl wget python openssh\n\nKali / NetHunter:\nsudo apt update\napt search ^kali-tools-\n\nLearn first. Run only on systems you own or have explicit permission to test.</string>
-    <string name="open_command_guide">Open command guide</string>
-    <string name="open_install_guide">Open installation guide</string>
-    <string name="open_repo">Open GitHub repository</string>
+    <string name="subtitle">Offline Termux + Kali NetHunter learning companion</string>
+    <string name="quick_start">Quick start\n\nTermux:\npkg update\npkg install git curl wget python openssh\n\nKali / NetHunter:\nsudo apt update\napt search ^kali-tools-\n\nAll lessons below open inside this app.</string>
+    <string name="open_command_guide">Read command lessons</string>
+    <string name="open_install_guide">Read installation guide</string>
+    <string name="open_tools_guide">Read Kali tools notes</string>
+    <string name="lesson_load_error">Lesson could not be loaded.</string>
     <string name="safety">Authorized labs • your own devices • localhost</string>
 </resources>

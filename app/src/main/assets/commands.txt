@@ -1,0 +1,108 @@
+NET HUNTER COMMAND LESSONS
+==========================
+
+Use commands only on your own device, localhost, or systems where you have explicit permission.
+
+1) TERMUX FOUNDATION
+Where: Termux
+Why: Prepare Android-side tools and storage.
+
+pkg update
+  Refresh Termux package lists.
+
+pkg upgrade
+  Upgrade installed Termux packages.
+
+pkg install git curl wget python openssh
+  Install Git, HTTP download tools, Python and SSH tools.
+
+termux-setup-storage
+  Ask Android for shared-storage access.
+
+pwd
+  Show your current directory.
+
+ls -la
+  List files, including hidden files, with details.
+
+cd <folder>
+  Enter a folder.
+
+mkdir lab
+  Create a folder named lab.
+
+cp source.txt copy.txt
+  Copy a file.
+
+mv old.txt new.txt
+  Move or rename a file.
+
+rm file.txt
+  Delete one file. Check the path first.
+
+2) KALI / NETHUNTER PACKAGE MANAGEMENT
+Where: Kali / NetHunter shell
+
+sudo apt update
+  Refresh Kali package indexes.
+
+sudo apt full-upgrade
+  Upgrade installed packages while handling dependency changes.
+
+apt search '^kali-tools-'
+  List Kali tool metapackages.
+
+apt show kali-tools-top10
+  Read what the Top 10 metapackage contains.
+
+sudo apt install kali-tools-top10
+  Install Kali's Top 10 metapackage.
+
+sudo apt install kali-tools-information-gathering
+sudo apt install kali-tools-vulnerability
+sudo apt install kali-tools-web
+sudo apt install kali-tools-forensics
+sudo apt install kali-tools-reporting
+  Install categories as you learn them.
+
+3) SYSTEM BASICS
+uname -a
+  Kernel/system information.
+whoami
+  Current user.
+id
+  User and group IDs.
+ip addr
+  Network interfaces and addresses.
+ip route
+  Routing table.
+ss -tulpn
+  Listening TCP/UDP sockets and owning processes.
+df -h
+  Storage usage.
+free -h
+  Memory usage.
+ps aux
+  Running processes.
+
+4) SAFE NETWORK LEARNING
+ping 127.0.0.1
+  Test your local TCP/IP stack.
+
+python3 -m http.server 8000
+  Start a local web server in the current folder.
+
+curl -I http://127.0.0.1:8000
+  Request headers from your local lab server.
+
+nmap 127.0.0.1
+  Scan your own localhost.
+
+nmap -sV 127.0.0.1
+  Identify services on your own localhost.
+
+5) HELP FIRST
+man <command>
+<command> --help
+apropos <keyword>
+  Read documentation before using a command.
