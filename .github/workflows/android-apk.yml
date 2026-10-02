@@ -36,8 +36,12 @@ jobs:
         with:
           gradle-version: "9.6.0"
 
-      - name: Build installable release APK
+      - name: Build release APK
         run: gradle :app:assembleRelease
+
+      - name: Build unsigned Play Store AAB
+        if: env.HAS_PLAY_KEY != 'true'
+        run: gradle :app:bundleRelease
 
       - name: Restore Play upload keystore
         if: env.HAS_PLAY_KEY == 'true'
@@ -59,9 +63,7 @@ jobs:
         run: |
           mkdir -p dist
           cp app/build/outputs/apk/release/app-release.apk "dist/Net-Hunter-Guide-${GITHUB_RUN_NUMBER}.apk"
-          if [ -f app/build/outputs/bundle/release/app-release.aab ]; then
-            cp app/build/outputs/bundle/release/app-release.aab "dist/Net-Hunter-Guide-${GITHUB_RUN_NUMBER}.aab"
-          fi
+          cp app/build/outputs/bundle/release/app-release.aab "dist/Net-Hunter-Guide-${GITHUB_RUN_NUMBER}.aab"
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
@@ -69,11 +71,10 @@ jobs:
           name: Net-Hunter-Guide-APK
           path: dist/*.apk
 
-      - name: Upload Play Store AAB artifact
-        if: env.HAS_PLAY_KEY == 'true'
+      - name: Upload AAB artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Net-Hunter-Guide-Play-AAB
+          name: Net-Hunter-Guide-AAB
           path: dist/*.aab
 
       - name: Publish GitHub release
@@ -82,8 +83,4 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           TAG="v1.0.${GITHUB_RUN_NUMBER}"
-          FILES=(dist/*.apk)
-          if compgen -G "dist/*.aab" > /dev/null; then
-            FILES+=(dist/*.aab)
-          fi
-          gh release create "$TAG" "${FILES[@]}"             --title "Net Hunter Guide $TAG"             --notes "Android release artifacts built automatically. APK is for direct installation/testing. The AAB is Play Store-ready only when the repository Play upload-key secrets are configured."
+          gh release create "$TAG" dist/*.apk dist/*.aab             --title "Net Hunter Guide $TAG"             --notes "Android APK plus AAB build. If repository signing secrets are not configured, the AAB is unsigned and intended to be signed offline with the private Play upload key."
