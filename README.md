@@ -4,6 +4,22 @@ Beginner-friendly Kali NetHunter + Termux learning repository for Android.
 
 > Use security tools only on systems you own or have explicit permission to test.
 
+## Android APK
+
+The repository now includes a lightweight **Net Hunter Guide** Android app.
+
+The app provides:
+
+- Termux and Kali quick-start commands;
+- links to the command and installation guides;
+- a clean Net Hunter "N" identity;
+- GitHub Actions APK builds;
+- automatic GitHub Release publishing after Android app changes land on `main`.
+
+Open the repository's **Releases** page to download the latest APK after a successful build.
+
+> The first GitHub builds are intended for direct installation/testing. A Play Store release should use a dedicated production signing key and Play Console configuration.
+
 ## Start here
 
 1. Read [Termux Setup](docs/01-termux-setup.md)
