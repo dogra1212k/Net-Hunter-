@@ -1,0 +1,217 @@
+KALI LINUX TOOL NOTES
+=====================
+
+Kali contains hundreds of packages. Learn them by category, purpose, documentation, and safe labs.
+
+A) INFORMATION GATHERING
+
+Nmap
+Purpose: Host/service discovery and version detection.
+Safe practice:
+  nmap 127.0.0.1
+  nmap -sV 127.0.0.1
+Learn:
+  nmap --help
+  man nmap
+
+Whois
+Purpose: Read public domain registration data.
+Commands:
+  whois example.com
+  man whois
+
+dig
+Purpose: DNS lookups.
+Commands:
+  dig example.com
+  dig example.com A
+  dig example.com MX
+
+dnsenum / dnsrecon
+Purpose: DNS reconnaissance in authorized environments.
+Start with:
+  dnsenum --help
+  dnsrecon --help
+
+B) WEB APPLICATION TESTING
+
+Nikto
+Purpose: Web-server configuration checks.
+Start with:
+  nikto -Help
+Use only against your own local lab.
+
+Burp Suite
+Purpose: Intercept and inspect HTTP traffic.
+Learning flow:
+  1. Start Burp Suite.
+  2. Use its built-in browser.
+  3. Open a local test application.
+  4. Inspect Proxy > HTTP history.
+  5. Learn headers, cookies, parameters and responses.
+
+OWASP ZAP
+Purpose: Web proxy and scanner for authorized apps.
+Practice with a local training target.
+
+sqlmap
+Purpose: SQL injection testing.
+Start with:
+  sqlmap --help
+Use deliberately vulnerable local training apps only.
+
+C) VULNERABILITY ANALYSIS
+
+searchsploit
+Purpose: Search the local Exploit-DB index.
+Commands:
+  searchsploit --help
+  searchsploit apache
+This searches references locally; it does not prove a target is vulnerable.
+
+Nuclei
+Purpose: Template-based checks.
+Start with:
+  nuclei -h
+Use only on systems you own or are authorized to assess.
+
+D) PASSWORD AUDITING
+
+John the Ripper
+Purpose: Audit password hashes you own or have permission to test.
+Commands:
+  john --help
+  john --list=formats
+
+Hashcat
+Purpose: Password hash auditing.
+Commands:
+  hashcat --help
+  hashcat -I
+
+Hydra
+Purpose: Login auditing across supported protocols.
+Start with:
+  hydra -h
+Practice only against a deliberately configured local lab account.
+
+E) PACKET / TRAFFIC ANALYSIS
+
+Wireshark
+Purpose: Graphical packet capture and protocol analysis.
+Safe workflow:
+  1. Capture your own traffic.
+  2. Generate traffic to localhost or your own server.
+  3. Filter with dns, http, tcp, or ip.addr.
+  4. Inspect protocol fields.
+
+tcpdump
+Purpose: Command-line packet capture.
+Commands:
+  tcpdump --help
+  ip link
+Capture only traffic you are authorized to inspect.
+
+F) WIRELESS
+
+aircrack-ng suite
+Purpose: Wireless assessment and auditing.
+Learn first:
+  aircrack-ng --help
+  airmon-ng --help
+Use only your own access point/lab network. Android driver support varies.
+
+G) FORENSICS
+
+ExifTool
+Purpose: Read/write file metadata.
+Commands:
+  exiftool file.jpg
+  exiftool -a -G1 -s file.jpg
+
+binwalk
+Purpose: Inspect embedded data in firmware/binaries.
+Commands:
+  binwalk --help
+  binwalk sample.bin
+
+strings
+Purpose: Extract readable strings.
+Command:
+  strings sample.bin | less
+
+file
+Purpose: Identify file type.
+Command:
+  file sample.bin
+
+Autopsy / Sleuth Kit
+Purpose: Disk-image and filesystem forensics.
+Use copied lab images and preserve originals.
+
+H) REVERSE ENGINEERING
+
+Ghidra
+Purpose: Static analysis and decompilation.
+Workflow:
+  1. Create project.
+  2. Import your own sample binary.
+  3. Run analysis.
+  4. Review functions, strings and cross-references.
+
+radare2
+Purpose: Command-line reverse engineering.
+Start with:
+  r2 -h
+
+I) METASPLOIT FRAMEWORK
+
+Purpose: Security testing, exploit research and lab validation.
+Safe start:
+  msfconsole
+Inside console:
+  help
+  search type:auxiliary scanner
+  info <module>
+Use isolated training labs only.
+
+J) REPORTING
+
+Dradis / Faraday
+Purpose: Organize findings and assessment notes.
+Record scope, permission, timestamps, commands, evidence, severity and remediation.
+
+K) KALI TOOL CATEGORIES
+
+Explore groups:
+  apt search '^kali-tools-'
+
+Common metapackages:
+  kali-tools-top10
+  kali-tools-information-gathering
+  kali-tools-vulnerability
+  kali-tools-web
+  kali-tools-passwords
+  kali-tools-wireless
+  kali-tools-sniffing-spoofing
+  kali-tools-forensics
+  kali-tools-reverse-engineering
+  kali-tools-exploitation
+  kali-tools-reporting
+  kali-tools-social-engineering
+
+Inspect before install:
+  apt show <metapackage>
+
+Install one learning category at a time:
+  sudo apt install <metapackage>
+
+FOR EVERY TOOL
+  1. Learn what problem it solves.
+  2. Check whether it runs in Termux or Kali.
+  3. Read --help and the man page.
+  4. Build a localhost/owned lab.
+  5. Run the smallest safe example.
+  6. Understand the output.
+  7. Save notes.
+  8. Learn remediation as well as detection.
