@@ -1,4 +1,4 @@
-name: Build and Publish Android APK
+name: Build Android APK and Play Bundle
 
 on:
   push:
@@ -18,6 +18,9 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
+    env:
+      HAS_PLAY_KEY: ${{ secrets.PLAY_UPLOAD_KEYSTORE_B64 != '' && secrets.PLAY_UPLOAD_STORE_PASSWORD != '' && secrets.PLAY_UPLOAD_KEY_ALIAS != '' && secrets.PLAY_UPLOAD_KEY_PASSWORD != '' }}
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -33,19 +36,45 @@ jobs:
         with:
           gradle-version: "9.6.0"
 
-      - name: Build release APK
+      - name: Build installable release APK
         run: gradle :app:assembleRelease
 
-      - name: Prepare APK
+      - name: Restore Play upload keystore
+        if: env.HAS_PLAY_KEY == 'true'
+        env:
+          PLAY_UPLOAD_KEYSTORE_B64: ${{ secrets.PLAY_UPLOAD_KEYSTORE_B64 }}
+        run: |
+          echo "$PLAY_UPLOAD_KEYSTORE_B64" | base64 --decode > "$RUNNER_TEMP/net-hunter-upload.jks"
+
+      - name: Build signed Play Store AAB
+        if: env.HAS_PLAY_KEY == 'true'
+        env:
+          PLAY_UPLOAD_KEYSTORE: ${{ runner.temp }}/net-hunter-upload.jks
+          PLAY_UPLOAD_STORE_PASSWORD: ${{ secrets.PLAY_UPLOAD_STORE_PASSWORD }}
+          PLAY_UPLOAD_KEY_ALIAS: ${{ secrets.PLAY_UPLOAD_KEY_ALIAS }}
+          PLAY_UPLOAD_KEY_PASSWORD: ${{ secrets.PLAY_UPLOAD_KEY_PASSWORD }}
+        run: gradle :app:bundleRelease
+
+      - name: Prepare artifacts
         run: |
           mkdir -p dist
           cp app/build/outputs/apk/release/app-release.apk "dist/Net-Hunter-Guide-${GITHUB_RUN_NUMBER}.apk"
+          if [ -f app/build/outputs/bundle/release/app-release.aab ]; then
+            cp app/build/outputs/bundle/release/app-release.aab "dist/Net-Hunter-Guide-${GITHUB_RUN_NUMBER}.aab"
+          fi
 
-      - name: Upload build artifact
+      - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: Net-Hunter-Guide-APK
           path: dist/*.apk
+
+      - name: Upload Play Store AAB artifact
+        if: env.HAS_PLAY_KEY == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: Net-Hunter-Guide-Play-AAB
+          path: dist/*.aab
 
       - name: Publish GitHub release
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
@@ -53,6 +82,8 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           TAG="v1.0.${GITHUB_RUN_NUMBER}"
-          gh release create "$TAG" dist/*.apk \
-            --title "Net Hunter Guide $TAG" \
-            --notes "Installable Android APK built automatically from the Net-Hunter repository. This initial GitHub release is debug-signed for direct installation and testing."
+          FILES=(dist/*.apk)
+          if compgen -G "dist/*.aab" > /dev/null; then
+            FILES+=(dist/*.aab)
+          fi
+          gh release create "$TAG" "${FILES[@]}"             --title "Net Hunter Guide $TAG"             --notes "Android release artifacts built automatically. APK is for direct installation/testing. The AAB is Play Store-ready only when the repository Play upload-key secrets are configured."
