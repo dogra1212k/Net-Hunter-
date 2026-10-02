@@ -55,3 +55,14 @@ Start with the focused lessons in [docs/tools/README.md](docs/tools/README.md):
 - John the Ripper basics for owned/test hashes
 
 Each lesson uses localhost, your own systems, or explicitly authorized labs.
+
+## Hands-on labs
+
+Practice safely with your own phone, localhost, or an authorized lab:
+
+- [Linux & shell basics](docs/labs/01-linux-shell.md)
+- [Networking basics](docs/labs/02-network-basics.md)
+- [Local HTTP lab](docs/labs/03-local-http.md)
+- [File & metadata forensics](docs/labs/04-file-metadata.md)
+
+Start from [docs/labs/README.md](docs/labs/README.md).
