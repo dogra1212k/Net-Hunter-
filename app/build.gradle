@@ -35,8 +35,6 @@ android {
             minifyEnabled false
             if (System.getenv("PLAY_UPLOAD_KEYSTORE")) {
                 signingConfig signingConfigs.release
-            } else {
-                signingConfig signingConfigs.debug
             }
         }
     }
