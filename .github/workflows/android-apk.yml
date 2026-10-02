@@ -62,7 +62,8 @@ jobs:
       - name: Prepare artifacts
         run: |
           mkdir -p dist
-          cp app/build/outputs/apk/release/app-release.apk "dist/Net-Hunter-Guide-${GITHUB_RUN_NUMBER}.apk"
+          APK_PATH=$(find app/build/outputs/apk/release -maxdepth 1 -type f -name "*.apk" | head -n 1)
+          cp "$APK_PATH" "dist/Net-Hunter-Guide-${GITHUB_RUN_NUMBER}.apk"
           cp app/build/outputs/bundle/release/app-release.aab "dist/Net-Hunter-Guide-${GITHUB_RUN_NUMBER}.aab"
 
       - name: Upload APK artifact
