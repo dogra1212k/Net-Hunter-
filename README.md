@@ -42,3 +42,16 @@ Large installs such as `kali-linux-default` or especially `kali-linux-everything
 ## Repository goal
 
 Each lesson explains **what a command does, why you use it, where it runs (Termux or Kali), and a safe practice exercise**.
+
+## Tool lessons
+
+Start with the focused lessons in [docs/tools/README.md](docs/tools/README.md):
+
+- Nmap basics
+- DNS reconnaissance fundamentals
+- Web/HTTP basics
+- Packet analysis basics
+- Forensics basics
+- John the Ripper basics for owned/test hashes
+
+Each lesson uses localhost, your own systems, or explicitly authorized labs.
