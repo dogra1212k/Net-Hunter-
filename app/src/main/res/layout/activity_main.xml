@@ -88,6 +88,23 @@
             android:text="@string/show_incomplete_only"
             android:textAllCaps="false" />
 
+        <TextView
+            android:id="@+id/visible_lessons_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:gravity="center"
+            android:textColor="@color/text_secondary"
+            android:textSize="13sp" />
+
+        <Button
+            android:id="@+id/btn_clear_filters"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/clear_filters"
+            android:textAllCaps="false" />
+
         <Button
             android:id="@+id/btn_export_backup"
             android:layout_width="wrap_content"
