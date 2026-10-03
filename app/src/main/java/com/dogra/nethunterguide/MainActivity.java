@@ -24,8 +24,14 @@ public class MainActivity extends Activity {
 
     private final List<Button> lessonButtons = new ArrayList<>();
     private final List<String> lessonAssets = new ArrayList<>();
+    private final List<String> lessonTitles = new ArrayList<>();
+
     private Button continueButton;
+    private Button favoritesFilterButton;
     private TextView progressText;
+    private TextView favoritesText;
+    private boolean favoritesOnly = false;
+    private String currentQuery = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,11 +54,21 @@ public class MainActivity extends Activity {
 
         continueButton = findViewById(R.id.btn_continue);
         progressText = findViewById(R.id.progress_text);
+        favoritesText = findViewById(R.id.favorites_text);
+        favoritesFilterButton = findViewById(R.id.btn_filter_favorites);
+
         Button resetProgressButton = findViewById(R.id.btn_reset_progress);
         resetProgressButton.setOnClickListener(v -> confirmResetProgress());
 
+        favoritesFilterButton.setOnClickListener(v -> {
+            favoritesOnly = !favoritesOnly;
+            updateFavoritesUi();
+            applyFilters();
+        });
+
         updateContinueButton();
         updateProgress();
+        updateFavoritesUi();
 
         TextView appMeta = findViewById(R.id.app_meta);
         appMeta.setText(getString(R.string.app_meta_format, getAppVersionName(), lessonButtons.size()));
@@ -64,7 +80,8 @@ public class MainActivity extends Activity {
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                filterLessons(s == null ? "" : s.toString());
+                currentQuery = s == null ? "" : s.toString();
+                applyFilters();
             }
 
             @Override
@@ -84,9 +101,9 @@ public class MainActivity extends Activity {
 
     private void bindLesson(int buttonId, String title, String assetName) {
         Button button = findViewById(buttonId);
-        button.setTag(title.toLowerCase(Locale.ROOT));
         lessonButtons.add(button);
         lessonAssets.add(assetName);
+        lessonTitles.add(title);
         button.setOnClickListener(v -> openLesson(title, assetName, true));
     }
 
@@ -131,6 +148,10 @@ public class MainActivity extends Activity {
         if (continueButton != null) {
             updateContinueButton();
         }
+        if (favoritesText != null && favoritesFilterButton != null) {
+            updateFavoritesUi();
+            applyFilters();
+        }
     }
 
     private void confirmResetProgress() {
@@ -163,13 +184,37 @@ public class MainActivity extends Activity {
         progressText.setText(getString(R.string.progress_format, completed, lessonAssets.size()));
     }
 
-    private void filterLessons(String query) {
-        String normalized = query.trim().toLowerCase(Locale.ROOT);
-        for (Button button : lessonButtons) {
-            String searchable = String.valueOf(button.getTag());
-            button.setVisibility(normalized.isEmpty() || searchable.contains(normalized)
-                    ? View.VISIBLE
-                    : View.GONE);
+    private void updateFavoritesUi() {
+        SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        int favorites = 0;
+        for (String asset : lessonAssets) {
+            if (prefs.getBoolean("favorite_" + asset, false)) {
+                favorites++;
+            }
+        }
+
+        favoritesText.setText(getString(R.string.favorites_format, favorites));
+        favoritesFilterButton.setText(
+                favoritesOnly ? R.string.show_all_lessons : R.string.show_favorites_only
+        );
+    }
+
+    private void applyFilters() {
+        String normalized = currentQuery.trim().toLowerCase(Locale.ROOT);
+        SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+
+        for (int i = 0; i < lessonButtons.size(); i++) {
+            String title = lessonTitles.get(i);
+            String asset = lessonAssets.get(i);
+
+            boolean matchesQuery = normalized.isEmpty()
+                    || title.toLowerCase(Locale.ROOT).contains(normalized);
+            boolean matchesFavorite = !favoritesOnly
+                    || prefs.getBoolean("favorite_" + asset, false);
+
+            lessonButtons.get(i).setVisibility(
+                    matchesQuery && matchesFavorite ? View.VISIBLE : View.GONE
+            );
         }
     }
 }
