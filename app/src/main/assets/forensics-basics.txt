@@ -1,0 +1,32 @@
+FORENSICS BASICS
+================
+
+Goal: inspect files and metadata without modifying original evidence.
+
+1) Identify a file
+file sample.bin
+
+2) Read printable strings
+strings sample.bin | less
+
+3) Inspect metadata
+exiftool photo.jpg
+exiftool -a -G1 -s photo.jpg
+
+4) Generate hashes
+sha256sum sample.bin
+  Useful for integrity checks and evidence tracking.
+
+5) Inspect embedded data
+binwalk sample.bin
+
+6) Good practice
+Work on a copy.
+Record timestamps.
+Do not alter the original.
+Save command history and notes.
+Document where the file came from.
+Compare hashes before and after copying.
+
+Safe lab:
+Use your own image, text file or sample binary and practice identifying its type, metadata and SHA-256 hash.
