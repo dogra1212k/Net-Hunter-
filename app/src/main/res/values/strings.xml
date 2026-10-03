@@ -4,6 +4,7 @@
     <string name="title">Net Hunter</string>
     <string name="subtitle">Offline Termux + Kali NetHunter learning companion</string>
     <string name="app_meta_format">Version %1$s • %2$d lessons</string>
+    <string name="unknown_version">unknown</string>
     <string name="quick_start">Quick start\n\nTermux:\npkg update\npkg install git curl wget python openssh\n\nKali / NetHunter:\nsudo apt update\napt search ^kali-tools-\n\nAll lessons below open inside this app.</string>
     <string name="open_command_guide">Read command lessons</string>
     <string name="open_install_guide">Read installation guide</string>
