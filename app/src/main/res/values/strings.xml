@@ -33,6 +33,9 @@
     <string name="favorites_format">Favorites: %1$d</string>
     <string name="show_favorites_only">Show favorites only</string>
     <string name="show_all_lessons">Show all lessons</string>
+    <string name="notes_format">Notes: %1$d</string>
+    <string name="show_notes_only">Show notes only</string>
+    <string name="show_all_notes">Show all notes</string>
     <string name="mark_complete">Mark complete</string>
     <string name="completed">✓ Completed</string>
     <string name="add_favorite">☆ Add to favorites</string>
