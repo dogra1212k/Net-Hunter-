@@ -1,0 +1,85 @@
+KALI TOOL CATEGORIES
+====================
+
+Kali contains many tools. Learn by category instead of trying to memorize everything at once.
+
+1) Information Gathering
+Examples:
+  nmap
+  whois
+  dig
+  dnsrecon
+
+2) Vulnerability Analysis
+Examples:
+  nuclei
+  nikto
+  searchsploit
+
+3) Web Application Testing
+Examples:
+  Burp Suite
+  OWASP ZAP
+  sqlmap
+
+4) Password Auditing
+Examples:
+  John the Ripper
+  Hashcat
+  Hydra
+
+5) Traffic Analysis
+Examples:
+  Wireshark
+  tcpdump
+
+6) Wireless Assessment
+Examples:
+  aircrack-ng suite
+Use only networks you own or have explicit permission to assess.
+
+7) Forensics
+Examples:
+  ExifTool
+  binwalk
+  strings
+  Sleuth Kit
+
+8) Reverse Engineering
+Examples:
+  Ghidra
+  radare2
+
+9) Security Frameworks
+Example:
+  Metasploit Framework
+Use isolated training environments.
+
+10) Reporting
+Examples:
+  Dradis
+  Faraday
+
+KALI METAPACKAGES
+
+List categories:
+  apt search '^kali-tools-'
+
+Inspect one:
+  apt show kali-tools-top10
+
+Examples:
+  kali-tools-top10
+  kali-tools-information-gathering
+  kali-tools-vulnerability
+  kali-tools-web
+  kali-tools-passwords
+  kali-tools-wireless
+  kali-tools-sniffing-spoofing
+  kali-tools-forensics
+  kali-tools-reverse-engineering
+  kali-tools-exploitation
+  kali-tools-reporting
+
+Tip:
+Install and learn one category at a time. Hundreds of tools installed at once mostly produces hundreds of icons you do not understand, a classic human achievement.
