@@ -56,6 +56,14 @@
             android:textSize="15sp"
             android:typeface="monospace" />
 
+        <Button
+            android:id="@+id/btn_continue"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="18dp"
+            android:textAllCaps="false"
+            android:visibility="gone" />
+
         <EditText
             android:id="@+id/search_lessons"
             android:layout_width="match_parent"
