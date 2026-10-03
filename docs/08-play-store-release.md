@@ -2,28 +2,69 @@
 
 This project can build Play Store-ready artifacts after a dedicated upload key is configured.
 
-## 1. Create and protect an upload key
+## 1. Generate a dedicated upload key
 
-Create the upload keystore on a trusted computer and keep the original private. Do not commit a keystore, passwords, service-account credentials, or signing files to Git.
+On Termux:
 
-## 2. Configure GitHub repository secrets
+```bash
+pkg install openjdk-17
+bash scripts/create-play-upload-key.sh
+```
 
-Add:
+On Linux/macOS with a JDK installed:
 
-- `PLAY_UPLOAD_KEYSTORE_B64`: base64-encoded upload keystore
-- `PLAY_UPLOAD_STORE_PASSWORD`: keystore password
-- `PLAY_UPLOAD_KEY_ALIAS`: upload-key alias
-- `PLAY_UPLOAD_KEY_PASSWORD`: upload-key password
+```bash
+bash scripts/create-play-upload-key.sh
+```
 
-The workflow restores the key only inside the GitHub Actions runner.
+The helper creates:
 
-## 3. Build
+- `play-signing/net-hunter-upload.jks`
+- `play-signing/net-hunter-upload.jks.b64`
+
+The files are ignored by Git. Back up the `.jks` file and passwords somewhere private. Losing the upload key can make future release management much more annoying than any human deserves.
+
+The default key alias created by the script is:
+
+```text
+net-hunter-upload
+```
+
+## 2. Verify the keystore
+
+```bash
+bash scripts/verify-play-upload-key.sh
+```
+
+This prints the certificate information and confirms that the expected alias exists.
+
+## 3. Configure GitHub repository secrets
+
+In the GitHub repository, open **Settings → Secrets and variables → Actions** and create all four secrets:
+
+- `PLAY_UPLOAD_KEYSTORE_B64`: contents of `play-signing/net-hunter-upload.jks.b64`
+- `PLAY_UPLOAD_STORE_PASSWORD`: the keystore password
+- `PLAY_UPLOAD_KEY_ALIAS`: `net-hunter-upload`
+- `PLAY_UPLOAD_KEY_PASSWORD`: the key password
+
+Do not paste these values into source files, issues, commits, README files, screenshots, or chat messages.
+
+The workflow now rejects a partially configured signing setup. Either all four secrets must exist or none of them should be configured.
+
+## 4. Build
 
 Push an Android-app change to `main` or run the Android workflow manually.
 
-The workflow runs lint first. With signing secrets present it builds a signed release APK and signed release AAB. Without signing secrets it builds an installable debug APK plus an unsigned release AAB for testing/preparation.
+The workflow:
 
-## 4. Play Console preparation
+1. validates the signing-secret configuration;
+2. runs Android lint;
+3. restores and verifies the upload keystore when all signing secrets are present;
+4. builds a signed release APK and signed release AAB when signing is configured;
+5. otherwise builds an installable debug APK plus an unsigned release AAB;
+6. uploads artifacts and publishes a GitHub Release.
+
+## 5. Play Console preparation
 
 Before production submission:
 
@@ -35,12 +76,14 @@ Before production submission:
 6. Add screenshots, feature graphic, app icon and support/contact details.
 7. Test through an internal testing track before production.
 
-## 5. Data-safety notes for this app
+## 6. Data-safety notes for this app
 
-The current app is designed as an offline learning guide. Its lesson progress and last-opened lesson are stored locally with Android SharedPreferences. The source code does not currently declare network permissions or implement analytics, advertising, account login, remote tracking or cloud sync.
+The current app is designed as an offline learning guide. Lesson progress, favorites, personal notes, last-opened lesson, and quiz score history are stored locally with Android SharedPreferences.
 
-Verify these statements again before every Play submission, because future code changes can alter the data-safety answers. Humans have historically enjoyed changing code after filling out forms.
+The source code currently does not declare network permissions or implement analytics, advertising, account login, remote tracking, or cloud sync.
 
-## 6. Versioning
+Verify these statements again before every Play submission because future code changes can alter the data-safety answers.
 
-Increase both `versionCode` and `versionName` in `app/build.gradle` before a new Play release. Google Play requires each uploaded release to use a higher versionCode than the previous one.
+## 7. Versioning
+
+Increase both `versionCode` and `versionName` in `app/build.gradle` before each new Play release. Google Play requires each uploaded release to use a higher `versionCode` than the previous one.
