@@ -19,6 +19,7 @@ Current app features:
 - notes count plus show-notes-only filter on the home screen;
 - JSON backup/export and restore/import for local learning state;
 - home-screen progress counter;
+- show-incomplete-only lesson filter;
 - confirmed progress reset;
 - Termux and Kali quick-start guidance;
 - Linux, networking, web/HTTP and forensics basics;
@@ -38,7 +39,7 @@ Current app features:
 - quiz progress retained across screen rotation;
 - no browser required for offline lesson reading.
 
-Current app version: **2.3.0**
+Current app version: **2.4.0**
 Package: **com.dogra.nethunterguide**
 
 ## Download / Build
