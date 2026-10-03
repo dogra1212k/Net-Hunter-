@@ -12,11 +12,12 @@ Current app features:
 
 - 13 offline lessons;
 - lesson search on the home screen;
+- continue-last-lesson support;
+- per-lesson completion tracking;
+- home-screen progress counter;
+- confirmed progress reset;
 - Termux and Kali quick-start guidance;
-- Linux basics;
-- networking basics;
-- web/HTTP basics;
-- forensics basics;
+- Linux, networking, web/HTTP and forensics basics;
 - Kali tool notes and categories;
 - learning roadmap;
 - command reference;
@@ -25,32 +26,33 @@ Current app features:
 - About & Safety page;
 - app version and lesson-count display;
 - in-app Back navigation;
-- no browser required for offline lessons.
+- no browser required for offline lesson reading.
 
-Current app version: **1.1.0**  
+Current app version: **1.2.0**  
 Package: **com.dogra.nethunterguide**
 
 ## Download / Build
 
-GitHub Actions builds both:
+GitHub Actions runs Android lint and then builds:
 
-- Android APK for direct testing/install;
-- Android App Bundle (AAB) for Play Store preparation.
+- an installable debug APK when Play signing secrets are not configured;
+- a signed release APK when Play signing secrets are configured;
+- a release AAB for Play Store preparation.
 
-After a successful build, open the repository **Releases** page to get the latest published APK/AAB.
-
-The build workflow keeps only the latest Android build running, so old queued builds are cancelled when newer app changes are pushed.
+After a successful build, open the repository **Releases** page for the latest APK/AAB. The workflow keeps only the latest Android build running, so stale queued builds are cancelled.
 
 ## Play Store signing
 
-For a production Play Store AAB, configure the repository secrets:
+For a production Play Store APK/AAB, configure these repository secrets:
 
 - `PLAY_UPLOAD_KEYSTORE_B64`
 - `PLAY_UPLOAD_STORE_PASSWORD`
 - `PLAY_UPLOAD_KEY_ALIAS`
 - `PLAY_UPLOAD_KEY_PASSWORD`
 
-Without those signing secrets, the workflow can still build test artifacts, but Play Store production publishing requires a dedicated upload key and Play Console configuration.
+Without those secrets, the APK is an installable debug build and the release AAB is not production-signed.
+
+See [Play Store Release Guide](docs/08-play-store-release.md).
 
 ## Start here
 
@@ -61,6 +63,7 @@ Without those signing secrets, the workflow can still build test artifacts, but 
 5. Keep the [Command Reference](docs/05-command-reference.md) nearby
 6. Use the [Installation Matrix](docs/06-installation-matrix.md)
 7. Follow the [Termux + Kali Command Guide](docs/07-termux-kali-command-guide.md)
+8. Use the [Play Store Release Guide](docs/08-play-store-release.md) for publishing
 
 ## Important: Termux is not Kali
 
@@ -100,28 +103,7 @@ Large installs such as `kali-linux-default` and especially `kali-linux-everythin
 
 ## Repository goal
 
-Each lesson aims to explain:
-
-- what a command or tool does;
-- why you use it;
-- where it runs: Termux or Kali;
-- what important options mean;
-- a safe practice exercise;
-- how to understand output instead of blindly pasting commands.
-
-## Tool lessons
-
-Start with [docs/tools/README.md](docs/tools/README.md).
-
-Topics include:
-
-- Linux/network basics
-- Nmap basics
-- DNS reconnaissance fundamentals
-- Web/HTTP basics
-- Packet analysis basics
-- Forensics basics
-- John the Ripper basics for owned/test hashes
+Each lesson aims to explain what a command or tool does, why you use it, where it runs, what important options mean, and how to practice safely while understanding the output.
 
 ## Hands-on labs
 
