@@ -4,7 +4,9 @@ import android.app.Activity;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -20,6 +22,7 @@ public class LessonActivity extends Activity {
     private String assetName;
     private Button completeButton;
     private Button favoriteButton;
+    private EditText noteInput;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,8 +32,10 @@ public class LessonActivity extends Activity {
         Button backButton = findViewById(R.id.btn_back);
         completeButton = findViewById(R.id.btn_complete);
         favoriteButton = findViewById(R.id.btn_favorite);
+        Button saveNoteButton = findViewById(R.id.btn_save_note);
         TextView title = findViewById(R.id.lesson_title);
         TextView content = findViewById(R.id.lesson_content);
+        noteInput = findViewById(R.id.lesson_note);
 
         backButton.setOnClickListener(v -> finish());
 
@@ -42,9 +47,19 @@ public class LessonActivity extends Activity {
 
         updateCompleteButton();
         updateFavoriteButton();
+        loadNote();
 
         completeButton.setOnClickListener(v -> toggleComplete());
         favoriteButton.setOnClickListener(v -> toggleFavorite());
+        saveNoteButton.setOnClickListener(v -> saveNote());
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (assetName != null && noteInput != null) {
+            persistNote(noteInput.getText().toString());
+        }
     }
 
     private void toggleComplete() {
@@ -93,6 +108,33 @@ public class LessonActivity extends Activity {
         boolean favorite = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
                 .getBoolean("favorite_" + assetName, false);
         favoriteButton.setText(favorite ? R.string.favorite_added : R.string.add_favorite);
+    }
+
+    private void loadNote() {
+        if (assetName == null) {
+            noteInput.setEnabled(false);
+            return;
+        }
+
+        String note = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
+                .getString("note_" + assetName, "");
+        noteInput.setText(note);
+    }
+
+    private void saveNote() {
+        if (assetName == null) {
+            return;
+        }
+
+        persistNote(noteInput.getText().toString());
+        Toast.makeText(this, R.string.note_saved, Toast.LENGTH_SHORT).show();
+    }
+
+    private void persistNote(String note) {
+        getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
+                .edit()
+                .putString("note_" + assetName, note)
+                .apply();
     }
 
     private String readAsset(String assetName) {
