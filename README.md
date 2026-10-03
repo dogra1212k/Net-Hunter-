@@ -30,11 +30,12 @@ Current app features:
 - About & Safety page;
 - app version and lesson-count display;
 - in-app Back navigation;
+- previous/next lesson navigation with a central lesson catalog;
 - offline quick quiz with scoring, saved last score, best score, answer explanations and restart;
 - quiz progress retained across screen rotation;
 - no browser required for offline lesson reading.
 
-Current app version: **1.9.0**
+Current app version: **2.0.0**
 Package: **com.dogra.nethunterguide**
 
 ## Download / Build

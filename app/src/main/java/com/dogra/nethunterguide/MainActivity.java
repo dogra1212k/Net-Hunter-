@@ -53,19 +53,25 @@ public class MainActivity extends Activity {
             notesOnly = savedInstanceState.getBoolean("notes_only", false);
         }
 
-        bindLesson(R.id.btn_commands, "Command Lessons", "commands.txt");
-        bindLesson(R.id.btn_install, "Installation Guide", "install.txt");
-        bindLesson(R.id.btn_tools, "Kali Tools Notes", "kali-tools.txt");
-        bindLesson(R.id.btn_linux, "Linux Basics", "linux-basics.txt");
-        bindLesson(R.id.btn_network, "Network Basics", "network-basics.txt");
-        bindLesson(R.id.btn_web, "Web Basics", "web-basics.txt");
-        bindLesson(R.id.btn_forensics, "Forensics Basics", "forensics-basics.txt");
-        bindLesson(R.id.btn_roadmap, "Learning Roadmap", "learning-roadmap.txt");
-        bindLesson(R.id.btn_categories, "Tool Categories", "tool-categories.txt");
-        bindLesson(R.id.btn_reference, "Command Reference", "command-reference.txt");
-        bindLesson(R.id.btn_troubleshooting, "Troubleshooting", "troubleshooting.txt");
-        bindLesson(R.id.btn_labs, "Practice Labs", "practice-labs.txt");
-        bindLesson(R.id.btn_about, "About & Safety", "about-safety.txt");
+        int[] lessonButtonIds = {
+                R.id.btn_commands,
+                R.id.btn_install,
+                R.id.btn_tools,
+                R.id.btn_linux,
+                R.id.btn_network,
+                R.id.btn_web,
+                R.id.btn_forensics,
+                R.id.btn_roadmap,
+                R.id.btn_categories,
+                R.id.btn_reference,
+                R.id.btn_troubleshooting,
+                R.id.btn_labs,
+                R.id.btn_about
+        };
+
+        for (int i = 0; i < lessonButtonIds.length; i++) {
+            bindLesson(lessonButtonIds[i], LessonCatalog.TITLES[i], LessonCatalog.ASSETS[i]);
+        }
 
         Button quizButton = findViewById(R.id.btn_quiz);
         quizButton.setOnClickListener(v -> startActivity(new Intent(this, QuizActivity.class)));
