@@ -1,0 +1,43 @@
+WEB BASICS
+==========
+
+Use a local lab or an application you own.
+
+1) HTTP concepts
+Request:
+  method + path + headers + optional body
+
+Response:
+  status code + headers + optional body
+
+2) Common methods
+GET
+POST
+PUT
+DELETE
+
+3) Common status codes
+200 OK
+301/302 Redirect
+400 Bad Request
+401 Unauthorized
+403 Forbidden
+404 Not Found
+500 Server Error
+
+4) Safe local practice
+python3 -m http.server 8000
+curl http://127.0.0.1:8000
+curl -I http://127.0.0.1:8000
+
+5) Browser developer tools
+Inspect:
+  Network requests
+  Headers
+  Cookies
+  Response content
+
+6) Security learning
+Learn input validation, authentication, authorization, sessions, HTTPS, secure cookies and least privilege.
+
+For testing tools such as Burp Suite or OWASP ZAP, use deliberately vulnerable local training apps or systems where you have explicit permission.
