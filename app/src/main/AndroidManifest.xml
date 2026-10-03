@@ -10,6 +10,9 @@
             android:name=".LessonActivity"
             android:exported="false" />
         <activity
+            android:name=".QuizActivity"
+            android:exported="false" />
+        <activity
             android:name=".MainActivity"
             android:exported="true">
             <intent-filter>
