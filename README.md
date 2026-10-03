@@ -2,23 +2,55 @@
 
 Beginner-friendly Kali NetHunter + Termux learning repository for Android.
 
-> Use security tools only on systems you own or have explicit permission to test.
+> Use security tools only on systems you own, localhost, your own lab, or systems where you have explicit permission.
 
-## Android APK
+## Net Hunter Guide Android App
 
-The repository now includes a lightweight **Net Hunter Guide** Android app.
+The repository includes an offline Android learning app with in-app lesson navigation.
 
-The app provides:
+Current app features:
 
-- Termux and Kali quick-start commands;
-- links to the command and installation guides;
-- a clean Net Hunter "N" identity;
-- GitHub Actions APK builds;
-- automatic GitHub Release publishing after Android app changes land on `main`.
+- 13 offline lessons;
+- lesson search on the home screen;
+- Termux and Kali quick-start guidance;
+- Linux basics;
+- networking basics;
+- web/HTTP basics;
+- forensics basics;
+- Kali tool notes and categories;
+- learning roadmap;
+- command reference;
+- troubleshooting guide;
+- safe practice labs;
+- About & Safety page;
+- app version and lesson-count display;
+- in-app Back navigation;
+- no browser required for offline lessons.
 
-Open the repository's **Releases** page to download the latest APK after a successful build.
+Current app version: **1.1.0**  
+Package: **com.dogra.nethunterguide**
 
-> The first GitHub builds are intended for direct installation/testing. A Play Store release should use a dedicated production signing key and Play Console configuration.
+## Download / Build
+
+GitHub Actions builds both:
+
+- Android APK for direct testing/install;
+- Android App Bundle (AAB) for Play Store preparation.
+
+After a successful build, open the repository **Releases** page to get the latest published APK/AAB.
+
+The build workflow keeps only the latest Android build running, so old queued builds are cancelled when newer app changes are pushed.
+
+## Play Store signing
+
+For a production Play Store AAB, configure the repository secrets:
+
+- `PLAY_UPLOAD_KEYSTORE_B64`
+- `PLAY_UPLOAD_STORE_PASSWORD`
+- `PLAY_UPLOAD_KEY_ALIAS`
+- `PLAY_UPLOAD_KEY_PASSWORD`
+
+Without those signing secrets, the workflow can still build test artifacts, but Play Store production publishing requires a dedicated upload key and Play Console configuration.
 
 ## Start here
 
@@ -27,8 +59,8 @@ Open the repository's **Releases** page to download the latest APK after a succe
 3. Browse [Tool Categories](docs/03-tool-categories.md)
 4. Follow the [Learning Roadmap](docs/04-learning-roadmap.md)
 5. Keep the [Command Reference](docs/05-command-reference.md) nearby
-6. Use the [Installation Matrix](docs/06-installation-matrix.md) before installing Kali toolsets
-7. Follow the [Termux + Kali Command Guide](docs/07-termux-kali-command-guide.md) for step-by-step command practice
+6. Use the [Installation Matrix](docs/06-installation-matrix.md)
+7. Follow the [Termux + Kali Command Guide](docs/07-termux-kali-command-guide.md)
 
 ## Important: Termux is not Kali
 
@@ -43,11 +75,9 @@ pkg install git curl wget python openssh
 termux-setup-storage
 ```
 
-These commands prepare the Android-side shell for Git, downloads, Python practice, SSH, and shared storage.
-
 ## Kali tool sets
 
-Inside Kali, inspect available metapackages:
+Inside Kali:
 
 ```bash
 sudo apt update
@@ -66,23 +96,24 @@ sudo apt install kali-tools-forensics
 sudo apt install kali-tools-reporting
 ```
 
-Large installs such as `kali-linux-default` or especially `kali-linux-everything` consume substantial storage and bandwidth. Install categories as you learn them.
+Large installs such as `kali-linux-default` and especially `kali-linux-everything` can consume substantial storage and bandwidth. Install categories as you learn them.
 
 ## Repository goal
 
-Each lesson explains:
+Each lesson aims to explain:
 
 - what a command or tool does;
 - why you use it;
 - where it runs: Termux or Kali;
-- what the important options mean;
-- a safe practice exercise using localhost, your own systems, or an explicitly authorized lab.
-
-The goal is understanding, not blindly pasting giant command lists.
+- what important options mean;
+- a safe practice exercise;
+- how to understand output instead of blindly pasting commands.
 
 ## Tool lessons
 
-Start with [docs/tools/README.md](docs/tools/README.md):
+Start with [docs/tools/README.md](docs/tools/README.md).
+
+Topics include:
 
 - Linux/network basics
 - Nmap basics
@@ -94,7 +125,7 @@ Start with [docs/tools/README.md](docs/tools/README.md):
 
 ## Hands-on labs
 
-Practice safely with your own phone, localhost, or an authorized lab:
+Practice with your own phone, localhost, your own files, or an authorized lab:
 
 - [Linux & shell basics](docs/labs/01-linux-shell.md)
 - [Networking basics](docs/labs/02-network-basics.md)
@@ -111,4 +142,4 @@ Run this **inside Kali / NetHunter**:
 bash scripts/kali-toolsets.sh
 ```
 
-It shows recommended tool categories, inspection commands, and safe installation guidance without automatically dumping a giant install onto your phone.
+It shows recommended tool categories, inspection commands, and safe installation guidance without automatically dumping a giant install onto the device.
