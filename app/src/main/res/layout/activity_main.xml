@@ -119,6 +119,30 @@
             android:text="@string/open_tool_categories"
             android:textAllCaps="false" />
 
+        <Button
+            android:id="@+id/btn_reference"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:text="@string/open_command_reference"
+            android:textAllCaps="false" />
+
+        <Button
+            android:id="@+id/btn_troubleshooting"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:text="@string/open_troubleshooting"
+            android:textAllCaps="false" />
+
+        <Button
+            android:id="@+id/btn_labs"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:text="@string/open_practice_labs"
+            android:textAllCaps="false" />
+
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
