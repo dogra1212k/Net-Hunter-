@@ -1,0 +1,57 @@
+TROUBLESHOOTING
+===============
+
+1) COMMAND NOT FOUND
+Check:
+  which <command>
+  <command> --help
+
+Then install the required package using Termux pkg or Kali apt.
+
+2) PACKAGE INSTALL FAILS
+Termux:
+  pkg update
+  pkg upgrade
+
+Kali:
+  sudo apt update
+  sudo apt --fix-broken install
+
+Then retry the intended package install.
+
+3) STORAGE ACCESS PROBLEM
+In Termux:
+  termux-setup-storage
+
+Then approve Android storage permission.
+
+4) NETWORK COMMAND SHOWS NOTHING
+Check:
+  ip addr
+  ip route
+  ping 127.0.0.1
+
+Do not assume internet access and localhost are the same thing.
+
+5) LOCAL HTTP SERVER WILL NOT START
+Try another port:
+  python3 -m http.server 8080
+
+Check listeners:
+  ss -tulpn
+
+6) PERMISSION DENIED
+Check file ownership and permissions:
+  ls -la
+
+Avoid using sudo blindly. Understand which file or command actually needs elevated access.
+
+7) APP LESSON DOES NOT OPEN
+Return to the home screen and reopen the lesson.
+If the problem continues, rebuild the latest app version from the repository.
+
+8) GOOD DEBUGGING HABIT
+Read the full error.
+Copy the exact command.
+Check the line immediately above the failure.
+Change one thing at a time.
