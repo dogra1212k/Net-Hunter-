@@ -2,6 +2,10 @@ package com.dogra.nethunterguide;
 
 import android.app.Activity;
 import android.content.SharedPreferences;
+import android.content.ClipData;
+import android.content.ClipboardManager;
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -52,6 +56,8 @@ public class LessonActivity extends Activity {
         Button saveNoteButton = findViewById(R.id.btn_save_note);
         Button decreaseTextButton = findViewById(R.id.btn_text_smaller);
         Button increaseTextButton = findViewById(R.id.btn_text_larger);
+        Button copyLessonButton = findViewById(R.id.btn_copy_lesson);
+        Button shareLessonButton = findViewById(R.id.btn_share_lesson);
         titleView = findViewById(R.id.lesson_title);
         contentView = findViewById(R.id.lesson_content);
         lessonScroll = findViewById(R.id.lesson_scroll);
@@ -75,6 +81,8 @@ public class LessonActivity extends Activity {
         nextButton.setOnClickListener(v -> moveLesson(1));
         decreaseTextButton.setOnClickListener(v -> changeTextSize(-1f));
         increaseTextButton.setOnClickListener(v -> changeTextSize(1f));
+        copyLessonButton.setOnClickListener(v -> copyLesson());
+        shareLessonButton.setOnClickListener(v -> shareLesson());
     }
 
     @Override
@@ -170,6 +178,41 @@ public class LessonActivity extends Activity {
                 .getInt("scroll_" + assetName, 0);
 
         lessonScroll.post(() -> lessonScroll.scrollTo(0, Math.max(savedY, 0)));
+    }
+
+    private String buildLessonShareText() {
+        String title = lessonTitle == null ? getString(R.string.app_name) : lessonTitle;
+        return title + "\n\n" + contentView.getText().toString();
+    }
+
+    private void copyLesson() {
+        ClipboardManager clipboard =
+                (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+        if (clipboard == null) {
+            Toast.makeText(this, R.string.copy_failed, Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        clipboard.setPrimaryClip(
+                ClipData.newPlainText(
+                        lessonTitle == null ? getString(R.string.app_name) : lessonTitle,
+                        buildLessonShareText()
+                )
+        );
+        Toast.makeText(this, R.string.lesson_copied, Toast.LENGTH_SHORT).show();
+    }
+
+    private void shareLesson() {
+        Intent shareIntent = new Intent(Intent.ACTION_SEND);
+        shareIntent.setType("text/plain");
+        shareIntent.putExtra(Intent.EXTRA_SUBJECT,
+                lessonTitle == null ? getString(R.string.app_name) : lessonTitle);
+        shareIntent.putExtra(Intent.EXTRA_TEXT, buildLessonShareText());
+
+        startActivity(Intent.createChooser(
+                shareIntent,
+                getString(R.string.share_lesson_chooser)
+        ));
     }
 
     private void changeTextSize(float delta) {
