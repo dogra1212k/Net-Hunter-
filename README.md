@@ -52,10 +52,10 @@ For a production Play Store APK/AAB, configure these repository secrets:
 
 - `PLAY_UPLOAD_KEYSTORE_B64`
 - `PLAY_UPLOAD_STORE_PASSWORD`
-- `PLAY_UPLOAD_KEY_ALIAS`
+- `PLAY_UPLOAD_KEY_ALIAS` (optional for a single-entry keystore)
 - `PLAY_UPLOAD_KEY_PASSWORD`
 
-Without those secrets, the APK is an installable debug build and the release AAB is not production-signed. If only some signing secrets are configured, the workflow now fails early instead of silently producing an unsigned release.
+Without a valid upload keystore, store password and key password, the APK is an installable debug build and the release AAB is not production-signed. The workflow validates signing and falls back to test artifacts with a warning when signing is invalid. For a single-entry keystore, the key alias is auto-detected.
 
 Generate and verify a dedicated upload key with:
 
