@@ -1,0 +1,55 @@
+LINUX BASICS
+============
+
+Use these commands on your own device or lab.
+
+1) Navigation
+pwd
+  Show current directory.
+
+ls -la
+  Show files, including hidden files.
+
+cd <folder>
+  Move into a folder.
+
+cd ..
+  Move up one level.
+
+2) Files and folders
+mkdir lab
+  Create a folder.
+
+touch notes.txt
+  Create an empty file.
+
+cp notes.txt notes-copy.txt
+  Copy a file.
+
+mv notes-copy.txt archive.txt
+  Rename or move a file.
+
+rm archive.txt
+  Delete a file. Check the path before pressing Enter.
+
+3) Reading text
+cat notes.txt
+less notes.txt
+head notes.txt
+tail notes.txt
+
+4) System information
+whoami
+id
+uname -a
+df -h
+free -h
+ps aux
+
+5) Help
+man <command>
+<command> --help
+apropos <keyword>
+
+Practice idea:
+Create a folder named lab, create a text file, copy it, rename it, list the directory, then remove only the files you created.
