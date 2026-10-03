@@ -22,6 +22,10 @@ public class LessonActivity extends Activity {
     private static final String PREFS_NAME = "lesson_state";
     private static final String PREF_LAST_TITLE = "last_title";
     private static final String PREF_LAST_ASSET = "last_asset";
+    private static final String PREF_TEXT_SIZE = "lesson_text_size";
+    private static final float DEFAULT_TEXT_SIZE = 14f;
+    private static final float MIN_TEXT_SIZE = 12f;
+    private static final float MAX_TEXT_SIZE = 24f;
 
     private String lessonTitle;
     private String assetName;
@@ -33,6 +37,7 @@ public class LessonActivity extends Activity {
     private TextView titleView;
     private TextView contentView;
     private ScrollView lessonScroll;
+    private float lessonTextSize;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,6 +50,8 @@ public class LessonActivity extends Activity {
         previousButton = findViewById(R.id.btn_previous_lesson);
         nextButton = findViewById(R.id.btn_next_lesson);
         Button saveNoteButton = findViewById(R.id.btn_save_note);
+        Button decreaseTextButton = findViewById(R.id.btn_text_smaller);
+        Button increaseTextButton = findViewById(R.id.btn_text_larger);
         titleView = findViewById(R.id.lesson_title);
         contentView = findViewById(R.id.lesson_content);
         lessonScroll = findViewById(R.id.lesson_scroll);
@@ -55,6 +62,10 @@ public class LessonActivity extends Activity {
         lessonTitle = getIntent().getStringExtra(EXTRA_TITLE);
         assetName = getIntent().getStringExtra(EXTRA_ASSET);
 
+        lessonTextSize = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
+                .getFloat(PREF_TEXT_SIZE, DEFAULT_TEXT_SIZE);
+        applyTextSize();
+
         showCurrentLesson();
 
         completeButton.setOnClickListener(v -> toggleComplete());
@@ -62,6 +73,8 @@ public class LessonActivity extends Activity {
         saveNoteButton.setOnClickListener(v -> saveNote());
         previousButton.setOnClickListener(v -> moveLesson(-1));
         nextButton.setOnClickListener(v -> moveLesson(1));
+        decreaseTextButton.setOnClickListener(v -> changeTextSize(-1f));
+        increaseTextButton.setOnClickListener(v -> changeTextSize(1f));
     }
 
     @Override
@@ -157,6 +170,29 @@ public class LessonActivity extends Activity {
                 .getInt("scroll_" + assetName, 0);
 
         lessonScroll.post(() -> lessonScroll.scrollTo(0, Math.max(savedY, 0)));
+    }
+
+    private void changeTextSize(float delta) {
+        lessonTextSize = Math.max(
+                MIN_TEXT_SIZE,
+                Math.min(MAX_TEXT_SIZE, lessonTextSize + delta)
+        );
+
+        getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
+                .edit()
+                .putFloat(PREF_TEXT_SIZE, lessonTextSize)
+                .apply();
+
+        applyTextSize();
+    }
+
+    private void applyTextSize() {
+        if (contentView != null) {
+            contentView.setTextSize(lessonTextSize);
+        }
+        if (noteInput != null) {
+            noteInput.setTextSize(Math.max(14f, lessonTextSize));
+        }
     }
 
     private void toggleComplete() {
