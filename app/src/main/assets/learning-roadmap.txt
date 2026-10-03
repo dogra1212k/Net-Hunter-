@@ -1,0 +1,76 @@
+LEARNING ROADMAP
+================
+
+Goal: learn Kali/Termux in a safe, practical order.
+
+STAGE 1 - Linux basics
+Learn:
+  pwd, ls, cd, mkdir, cp, mv, rm
+  permissions
+  processes
+  package management
+
+STAGE 2 - Networking basics
+Learn:
+  IP addresses
+  ports
+  TCP vs UDP
+  DNS
+  routing
+  localhost
+
+Practice:
+  ip addr
+  ip route
+  ss -tulpn
+  ping 127.0.0.1
+
+STAGE 3 - Web basics
+Learn:
+  HTTP methods
+  status codes
+  headers
+  cookies
+  sessions
+  HTTPS
+
+STAGE 4 - Information gathering
+Start with documentation and local labs.
+Examples:
+  nmap
+  whois
+  dig
+
+STAGE 5 - Traffic analysis
+Learn:
+  tcpdump
+  Wireshark
+  protocol filters
+
+STAGE 6 - Forensics
+Learn:
+  file
+  strings
+  exiftool
+  sha256sum
+  binwalk
+
+STAGE 7 - Web security testing
+Use only local training apps or systems where you have explicit permission.
+Learn Burp Suite and OWASP ZAP before automated scanners.
+
+STAGE 8 - Password auditing
+Only use hashes/accounts you own or are authorized to test.
+Learn John the Ripper and Hashcat basics.
+
+STAGE 9 - Reporting
+For every lab, record:
+  scope
+  commands
+  output
+  screenshots
+  findings
+  remediation
+
+RULE
+Do not jump straight to exploitation tools. First understand Linux, networking, web protocols and how to read tool output.
