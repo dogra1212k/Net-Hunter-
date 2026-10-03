@@ -44,12 +44,12 @@ In the GitHub repository, open **Settings → Secrets and variables → Actions*
 
 - `PLAY_UPLOAD_KEYSTORE_B64`: contents of `play-signing/net-hunter-upload.jks.b64`
 - `PLAY_UPLOAD_STORE_PASSWORD`: the keystore password
-- `PLAY_UPLOAD_KEY_ALIAS`: `net-hunter-upload`
+- `PLAY_UPLOAD_KEY_ALIAS`: optional when the keystore contains exactly one key; otherwise set the alias explicitly
 - `PLAY_UPLOAD_KEY_PASSWORD`: the key password
 
 Do not paste these values into source files, issues, commits, README files, screenshots, or chat messages.
 
-The workflow now rejects a partially configured signing setup. Either all four secrets must exist or none of them should be configured.
+The workflow validates signing at runtime. If the keystore secret is missing or malformed, it emits a warning and falls back to test artifacts instead of breaking the entire Android build. A production Play release still requires a valid upload keystore, store password and key password. The alias is auto-detected when the keystore contains exactly one entry.
 
 ## 4. Build
 
@@ -59,10 +59,11 @@ The workflow:
 
 1. validates the signing-secret configuration;
 2. runs Android lint;
-3. restores and verifies the upload keystore when all signing secrets are present;
-4. builds a signed release APK and signed release AAB when signing is configured;
-5. otherwise builds an installable debug APK plus an unsigned release AAB;
-6. uploads artifacts and publishes a GitHub Release.
+3. restores and verifies the upload keystore when signing values are present;
+4. auto-detects the alias for a single-entry keystore when `PLAY_UPLOAD_KEY_ALIAS` is omitted;
+5. builds a signed release APK and signed release AAB only when signing validation succeeds;
+6. otherwise builds an installable debug APK plus an unsigned release AAB;
+7. uploads artifacts and publishes a GitHub Release.
 
 ## 5. Play Console preparation
 
