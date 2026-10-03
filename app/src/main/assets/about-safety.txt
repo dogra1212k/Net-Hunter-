@@ -10,6 +10,8 @@ WHAT THIS APP IS FOR
 - Reading tool notes
 - Running safe labs
 - Building troubleshooting habits
+- Tracking lesson progress
+- Continuing the last opened lesson
 
 SAFE USE
 Use commands and security tools only on:
@@ -29,8 +31,10 @@ GOOD PRACTICE
 APP BEHAVIOR
 Lessons are bundled inside the app and open in the app itself.
 The home screen search filters lesson buttons by title.
+Progress and the last opened lesson are stored locally on the device.
+Progress can be reset only after a confirmation prompt.
 No browser is required for offline lesson reading.
 
 PROJECT
 Package: com.dogra.nethunterguide
-Version: 1.1.0
+Version: 1.2.0
