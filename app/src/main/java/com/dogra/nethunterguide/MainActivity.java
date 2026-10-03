@@ -15,6 +15,10 @@ public class MainActivity extends Activity {
         bindLesson(R.id.btn_commands, "Command Lessons", "commands.txt");
         bindLesson(R.id.btn_install, "Installation Guide", "install.txt");
         bindLesson(R.id.btn_tools, "Kali Tools Notes", "kali-tools.txt");
+        bindLesson(R.id.btn_linux, "Linux Basics", "linux-basics.txt");
+        bindLesson(R.id.btn_network, "Network Basics", "network-basics.txt");
+        bindLesson(R.id.btn_web, "Web Basics", "web-basics.txt");
+        bindLesson(R.id.btn_forensics, "Forensics Basics", "forensics-basics.txt");
     }
 
     private void bindLesson(int buttonId, String title, String assetName) {
