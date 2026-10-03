@@ -81,6 +81,14 @@
             android:textAllCaps="false" />
 
         <Button
+            android:id="@+id/btn_filter_incomplete"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/show_incomplete_only"
+            android:textAllCaps="false" />
+
+        <Button
             android:id="@+id/btn_export_backup"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
