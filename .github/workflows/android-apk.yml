@@ -23,7 +23,7 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      HAS_PLAY_KEY: ${{ secrets.PLAY_UPLOAD_KEYSTORE_B64 != '' && secrets.PLAY_UPLOAD_STORE_PASSWORD != '' && secrets.PLAY_UPLOAD_KEY_ALIAS != '' && secrets.PLAY_UPLOAD_KEY_PASSWORD != '' }}
+      HAS_PLAY_KEY: ${{ secrets.PLAY_UPLOAD_KEYSTORE_B64 != '' && secrets.PLAY_UPLOAD_STORE_PASSWORD != '' && secrets.PLAY_UPLOAD_KEY_PASSWORD != '' }}
 
     steps:
       - name: Checkout
@@ -44,7 +44,6 @@ jobs:
         env:
           PLAY_UPLOAD_KEYSTORE_B64: ${{ secrets.PLAY_UPLOAD_KEYSTORE_B64 }}
           PLAY_UPLOAD_STORE_PASSWORD: ${{ secrets.PLAY_UPLOAD_STORE_PASSWORD }}
-          PLAY_UPLOAD_KEY_ALIAS: ${{ secrets.PLAY_UPLOAD_KEY_ALIAS }}
           PLAY_UPLOAD_KEY_PASSWORD: ${{ secrets.PLAY_UPLOAD_KEY_PASSWORD }}
         run: |
           count=0
@@ -62,21 +61,19 @@ jobs:
             missing="$missing PLAY_UPLOAD_STORE_PASSWORD"
           fi
 
-          if [ -n "$PLAY_UPLOAD_KEY_ALIAS" ]; then
-            count=$((count + 1))
-          else
-            missing="$missing PLAY_UPLOAD_KEY_ALIAS"
-          fi
-
           if [ -n "$PLAY_UPLOAD_KEY_PASSWORD" ]; then
             count=$((count + 1))
           else
             missing="$missing PLAY_UPLOAD_KEY_PASSWORD"
           fi
 
-          if [ "$count" -ne 0 ] && [ "$count" -ne 4 ]; then
-            echo "::error::Play signing is partially configured. Missing:$missing"
+          if [ "$count" -ne 0 ] && [ "$count" -ne 3 ]; then
+            echo "::error::Play signing is partially configured. Missing required secrets:$missing"
             exit 1
+          fi
+
+          if [ -z "$PLAY_UPLOAD_KEY_ALIAS" ]; then
+            echo "PLAY_UPLOAD_KEY_ALIAS is not set; workflow will auto-detect it from a single-entry keystore."
           fi
 
       - name: Run Android lint
@@ -97,12 +94,36 @@ jobs:
         if: env.HAS_PLAY_KEY != 'true'
         run: gradle :app:bundleRelease
 
+      - name: Resolve Play upload key alias
+        if: env.HAS_PLAY_KEY == 'true'
+        env:
+          PLAY_UPLOAD_KEYSTORE: ${{ runner.temp }}/net-hunter-upload.jks
+          PLAY_UPLOAD_STORE_PASSWORD: ${{ secrets.PLAY_UPLOAD_STORE_PASSWORD }}
+          CONFIGURED_ALIAS: ${{ secrets.PLAY_UPLOAD_KEY_ALIAS }}
+        run: |
+          if [ -n "$CONFIGURED_ALIAS" ]; then
+            alias_name="$CONFIGURED_ALIAS"
+          else
+            mapfile -t aliases < <(
+              keytool -list -v                 -keystore "$PLAY_UPLOAD_KEYSTORE"                 -storepass "$PLAY_UPLOAD_STORE_PASSWORD"               | sed -n 's/^Alias name: //p'
+            )
+
+            if [ "${#aliases[@]}" -ne 1 ]; then
+              echo "::error::Could not safely auto-detect a single key alias. Configure PLAY_UPLOAD_KEY_ALIAS."
+              exit 1
+            fi
+
+            alias_name="${aliases[0]}"
+          fi
+
+          echo "PLAY_UPLOAD_KEY_ALIAS=$alias_name" >> "$GITHUB_ENV"
+          echo "Using Play upload key alias: $alias_name"
+
       - name: Verify Play upload keystore
         if: env.HAS_PLAY_KEY == 'true'
         env:
           PLAY_UPLOAD_KEYSTORE: ${{ runner.temp }}/net-hunter-upload.jks
           PLAY_UPLOAD_STORE_PASSWORD: ${{ secrets.PLAY_UPLOAD_STORE_PASSWORD }}
-          PLAY_UPLOAD_KEY_ALIAS: ${{ secrets.PLAY_UPLOAD_KEY_ALIAS }}
         run: |
           keytool -list             -keystore "$PLAY_UPLOAD_KEYSTORE"             -storepass "$PLAY_UPLOAD_STORE_PASSWORD"             -alias "$PLAY_UPLOAD_KEY_ALIAS" >/dev/null
 
