@@ -39,9 +39,10 @@ Current app features:
 - copy and share lesson content from the lesson screen;
 - offline quick quiz with scoring, saved last score, best score, answer explanations and restart;
 - quiz progress retained across screen rotation;
-- no browser required for offline lesson reading.
+- no browser required for offline lesson reading;
+- automated unit-test gate in CI for lesson catalog integrity.
 
-Current app version: **2.6.0**
+Current app version: **2.7.0**
 Package: **com.dogra.nethunterguide**
 
 ## Download / Build
@@ -73,6 +74,11 @@ bash scripts/verify-play-upload-key.sh
 ```
 
 See [Play Store Release Guide](docs/08-play-store-release.md).
+
+Additional publishing docs:
+
+- [Privacy Policy](docs/09-privacy-policy.md)
+- [Play Store Listing Draft](docs/10-play-store-listing.md)
 
 ## Start here
 
