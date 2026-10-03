@@ -19,6 +19,14 @@
     <string name="open_troubleshooting">Open troubleshooting guide</string>
     <string name="open_practice_labs">Open safe practice labs</string>
     <string name="open_about_safety">About &amp; safety</string>
+    <string name="open_quiz">Open quick quiz</string>
+    <string name="quiz_title">Quick Quiz</string>
+    <string name="quiz_score">Score: %1$d/%2$d</string>
+    <string name="quiz_next">Next</string>
+    <string name="quiz_restart">Restart quiz</string>
+    <string name="quiz_back">← Back to Net Hunter</string>
+    <string name="quiz_correct">Correct</string>
+    <string name="quiz_incorrect">Incorrect</string>
     <string name="search_hint">Search lessons</string>
     <string name="continue_lesson_format">Continue: %1$s</string>
     <string name="progress_format">Progress: %1$d/%2$d completed</string>
