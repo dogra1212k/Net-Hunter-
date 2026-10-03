@@ -47,6 +47,17 @@
             android:textSize="15sp"
             android:typeface="monospace" />
 
+        <EditText
+            android:id="@+id/search_lessons"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:hint="@string/search_hint"
+            android:inputType="text"
+            android:singleLine="true"
+            android:textColor="@color/text_primary"
+            android:textColorHint="@color/text_secondary" />
+
         <Button
             android:id="@+id/btn_commands"
             android:layout_width="match_parent"
@@ -141,6 +152,14 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
             android:text="@string/open_practice_labs"
+            android:textAllCaps="false" />
+
+        <Button
+            android:id="@+id/btn_about"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:text="@string/open_about_safety"
             android:textAllCaps="false" />
 
         <TextView
