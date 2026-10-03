@@ -44,6 +44,36 @@
             android:textStyle="bold" />
 
         <TextView
+            android:id="@+id/notes_heading"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="18dp"
+            android:text="@string/personal_notes"
+            android:textColor="@color/accent"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+        <EditText
+            android:id="@+id/lesson_note"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:gravity="top|start"
+            android:hint="@string/personal_notes_hint"
+            android:inputType="textMultiLine|textCapSentences"
+            android:minLines="4"
+            android:textColor="@color/text_primary"
+            android:textColorHint="@color/text_secondary" />
+
+        <Button
+            android:id="@+id/btn_save_note"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/save_note"
+            android:textAllCaps="false" />
+
+        <TextView
             android:id="@+id/lesson_content"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
