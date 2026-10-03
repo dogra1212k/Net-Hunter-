@@ -22,7 +22,9 @@ public class MainActivity extends Activity {
     private static final String PREF_LAST_ASSET = "last_asset";
 
     private final List<Button> lessonButtons = new ArrayList<>();
+    private final List<String> lessonAssets = new ArrayList<>();
     private Button continueButton;
+    private TextView progressText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,7 +46,9 @@ public class MainActivity extends Activity {
         bindLesson(R.id.btn_about, "About & Safety", "about-safety.txt");
 
         continueButton = findViewById(R.id.btn_continue);
+        progressText = findViewById(R.id.progress_text);
         updateContinueButton();
+        updateProgress();
 
         TextView appMeta = findViewById(R.id.app_meta);
         appMeta.setText(getString(R.string.app_meta_format, getAppVersionName(), lessonButtons.size()));
@@ -78,6 +82,7 @@ public class MainActivity extends Activity {
         Button button = findViewById(buttonId);
         button.setTag(title.toLowerCase(Locale.ROOT));
         lessonButtons.add(button);
+        lessonAssets.add(assetName);
         button.setOnClickListener(v -> openLesson(title, assetName, true));
     }
 
@@ -111,6 +116,28 @@ public class MainActivity extends Activity {
         continueButton.setText(getString(R.string.continue_lesson_format, title));
         continueButton.setVisibility(View.VISIBLE);
         continueButton.setOnClickListener(v -> openLesson(title, asset, false));
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (progressText != null) {
+            updateProgress();
+        }
+        if (continueButton != null) {
+            updateContinueButton();
+        }
+    }
+
+    private void updateProgress() {
+        SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        int completed = 0;
+        for (String asset : lessonAssets) {
+            if (prefs.getBoolean("completed_" + asset, false)) {
+                completed++;
+            }
+        }
+        progressText.setText(getString(R.string.progress_format, completed, lessonAssets.size()));
     }
 
     private void filterLessons(String query) {
