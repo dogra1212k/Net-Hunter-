@@ -124,6 +124,14 @@
         <Button android:id="@+id/btn_labs" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="10dp" android:text="@string/open_practice_labs" android:textAllCaps="false" />
         <Button android:id="@+id/btn_about" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="10dp" android:text="@string/open_about_safety" android:textAllCaps="false" />
 
+        <Button
+            android:id="@+id/btn_quiz"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:text="@string/open_quiz"
+            android:textAllCaps="false" />
+
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
