@@ -8,6 +8,7 @@ import android.text.TextWatcher;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,6 +36,9 @@ public class MainActivity extends Activity {
         bindLesson(R.id.btn_troubleshooting, "Troubleshooting", "troubleshooting.txt");
         bindLesson(R.id.btn_labs, "Practice Labs", "practice-labs.txt");
         bindLesson(R.id.btn_about, "About & Safety", "about-safety.txt");
+
+        TextView appMeta = findViewById(R.id.app_meta);
+        appMeta.setText(getString(R.string.app_meta_format, BuildConfig.VERSION_NAME, lessonButtons.size()));
 
         EditText search = findViewById(R.id.search_lessons);
         search.addTextChangedListener(new TextWatcher() {
