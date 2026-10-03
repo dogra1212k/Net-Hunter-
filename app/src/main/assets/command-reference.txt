@@ -1,0 +1,44 @@
+COMMAND REFERENCE
+=================
+
+Use commands only on your own device, localhost, or systems where you have explicit permission.
+
+FILES
+pwd                Show current directory
+ls -la             List files with details
+cd <folder>        Change directory
+mkdir <name>       Create folder
+cp <src> <dst>     Copy file
+mv <src> <dst>     Move or rename
+rm <file>          Delete one file
+
+SYSTEM
+whoami             Show current user
+id                 Show user/group IDs
+uname -a           Kernel/system info
+df -h              Disk usage
+free -h            Memory usage
+ps aux             Running processes
+
+NETWORK
+ip addr            Show interfaces and IPs
+ip route           Show routes
+ss -tulpn          Show listening sockets
+ping 127.0.0.1     Test localhost
+
+PACKAGES
+pkg update         Refresh Termux package lists
+pkg upgrade        Upgrade Termux packages
+sudo apt update    Refresh Kali package lists
+apt search <name>  Search packages
+apt show <name>    Show package info
+
+WEB / LOCAL LAB
+python3 -m http.server 8000
+curl http://127.0.0.1:8000
+curl -I http://127.0.0.1:8000
+
+HELP
+man <command>
+<command> --help
+apropos <keyword>
