@@ -40,12 +40,8 @@ jobs:
         with:
           gradle-version: "9.6.0"
 
-      - name: Build release APK
-        run: gradle :app:assembleRelease
-
-      - name: Build unsigned Play Store AAB
-        if: env.HAS_PLAY_KEY != 'true'
-        run: gradle :app:bundleRelease
+      - name: Run Android lint
+        run: gradle :app:lint
 
       - name: Restore Play upload keystore
         if: env.HAS_PLAY_KEY == 'true'
@@ -54,19 +50,33 @@ jobs:
         run: |
           echo "$PLAY_UPLOAD_KEYSTORE_B64" | base64 --decode > "$RUNNER_TEMP/net-hunter-upload.jks"
 
-      - name: Build signed Play Store AAB
+      - name: Build installable debug APK
+        if: env.HAS_PLAY_KEY != 'true'
+        run: gradle :app:assembleDebug
+
+      - name: Build unsigned Play Store AAB
+        if: env.HAS_PLAY_KEY != 'true'
+        run: gradle :app:bundleRelease
+
+      - name: Build signed release APK and AAB
         if: env.HAS_PLAY_KEY == 'true'
         env:
           PLAY_UPLOAD_KEYSTORE: ${{ runner.temp }}/net-hunter-upload.jks
           PLAY_UPLOAD_STORE_PASSWORD: ${{ secrets.PLAY_UPLOAD_STORE_PASSWORD }}
           PLAY_UPLOAD_KEY_ALIAS: ${{ secrets.PLAY_UPLOAD_KEY_ALIAS }}
           PLAY_UPLOAD_KEY_PASSWORD: ${{ secrets.PLAY_UPLOAD_KEY_PASSWORD }}
-        run: gradle :app:bundleRelease
+        run: |
+          gradle :app:assembleRelease
+          gradle :app:bundleRelease
 
       - name: Prepare artifacts
         run: |
           mkdir -p dist
-          APK_PATH=$(find app/build/outputs/apk/release -maxdepth 1 -type f -name "*.apk" | head -n 1)
+          if [ "$HAS_PLAY_KEY" = "true" ]; then
+            APK_PATH="app/build/outputs/apk/release/app-release.apk"
+          else
+            APK_PATH="app/build/outputs/apk/debug/app-debug.apk"
+          fi
           cp "$APK_PATH" "dist/Net-Hunter-Guide-${GITHUB_RUN_NUMBER}.apk"
           cp app/build/outputs/bundle/release/app-release.aab "dist/Net-Hunter-Guide-${GITHUB_RUN_NUMBER}.aab"
 
@@ -75,17 +85,25 @@ jobs:
         with:
           name: Net-Hunter-Guide-APK
           path: dist/*.apk
+          retention-days: 30
 
       - name: Upload AAB artifact
         uses: actions/upload-artifact@v4
         with:
           name: Net-Hunter-Guide-AAB
           path: dist/*.aab
+          retention-days: 30
 
       - name: Publish GitHub release
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          TAG="v1.0.${GITHUB_RUN_NUMBER}"
-          gh release create "$TAG" dist/*.apk dist/*.aab             --title "Net Hunter Guide $TAG"             --notes "Android APK plus AAB build. If repository signing secrets are not configured, the AAB is unsigned and intended to be signed offline with the private Play upload key."
+          APP_VERSION=$(sed -n 's/.*versionName "\(.*\)".*/\1/p' app/build.gradle | head -n 1)
+          TAG="v${APP_VERSION}-build.${GITHUB_RUN_NUMBER}"
+          if [ "$HAS_PLAY_KEY" = "true" ]; then
+            NOTES="Signed release APK and signed AAB for Net Hunter Guide ${APP_VERSION}."
+          else
+            NOTES="Installable debug APK plus unsigned release AAB for Net Hunter Guide ${APP_VERSION}. Configure Play upload-key secrets before production Play Store submission."
+          fi
+          gh release create "$TAG" dist/*.apk dist/*.aab --title "Net Hunter Guide ${APP_VERSION}" --notes "$NOTES"
