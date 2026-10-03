@@ -40,6 +40,24 @@ jobs:
         with:
           gradle-version: "9.6.0"
 
+      - name: Validate Play signing secrets
+        env:
+          PLAY_UPLOAD_KEYSTORE_B64: ${{ secrets.PLAY_UPLOAD_KEYSTORE_B64 }}
+          PLAY_UPLOAD_STORE_PASSWORD: ${{ secrets.PLAY_UPLOAD_STORE_PASSWORD }}
+          PLAY_UPLOAD_KEY_ALIAS: ${{ secrets.PLAY_UPLOAD_KEY_ALIAS }}
+          PLAY_UPLOAD_KEY_PASSWORD: ${{ secrets.PLAY_UPLOAD_KEY_PASSWORD }}
+        run: |
+          count=0
+          [ -n "$PLAY_UPLOAD_KEYSTORE_B64" ] && count=$((count + 1))
+          [ -n "$PLAY_UPLOAD_STORE_PASSWORD" ] && count=$((count + 1))
+          [ -n "$PLAY_UPLOAD_KEY_ALIAS" ] && count=$((count + 1))
+          [ -n "$PLAY_UPLOAD_KEY_PASSWORD" ] && count=$((count + 1))
+
+          if [ "$count" -ne 0 ] && [ "$count" -ne 4 ]; then
+            echo "::error::Play signing is partially configured. Set all four PLAY_UPLOAD_* secrets or remove all four."
+            exit 1
+          fi
+
       - name: Run Android lint
         run: gradle :app:lint
 
@@ -57,6 +75,15 @@ jobs:
       - name: Build unsigned Play Store AAB
         if: env.HAS_PLAY_KEY != 'true'
         run: gradle :app:bundleRelease
+
+      - name: Verify Play upload keystore
+        if: env.HAS_PLAY_KEY == 'true'
+        env:
+          PLAY_UPLOAD_KEYSTORE: ${{ runner.temp }}/net-hunter-upload.jks
+          PLAY_UPLOAD_STORE_PASSWORD: ${{ secrets.PLAY_UPLOAD_STORE_PASSWORD }}
+          PLAY_UPLOAD_KEY_ALIAS: ${{ secrets.PLAY_UPLOAD_KEY_ALIAS }}
+        run: |
+          keytool -list             -keystore "$PLAY_UPLOAD_KEYSTORE"             -storepass "$PLAY_UPLOAD_STORE_PASSWORD"             -alias "$PLAY_UPLOAD_KEY_ALIAS" >/dev/null
 
       - name: Build signed release APK and AAB
         if: env.HAS_PLAY_KEY == 'true'
