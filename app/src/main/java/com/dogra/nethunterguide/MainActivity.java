@@ -3,6 +3,7 @@ package com.dogra.nethunterguide;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Intent;
+import android.net.Uri;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.Editable;
@@ -11,16 +12,22 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+
+import org.json.JSONObject;
 
 public class MainActivity extends Activity {
 
     private static final String PREFS_NAME = "lesson_state";
     private static final String PREF_LAST_TITLE = "last_title";
     private static final String PREF_LAST_ASSET = "last_asset";
+    private static final int REQ_EXPORT_BACKUP = 1001;
+    private static final int REQ_IMPORT_BACKUP = 1002;
 
     private final List<Button> lessonButtons = new ArrayList<>();
     private final List<String> lessonAssets = new ArrayList<>();
@@ -66,7 +73,12 @@ public class MainActivity extends Activity {
         notesFilterButton = findViewById(R.id.btn_filter_notes);
 
         Button resetProgressButton = findViewById(R.id.btn_reset_progress);
+        Button exportBackupButton = findViewById(R.id.btn_export_backup);
+        Button importBackupButton = findViewById(R.id.btn_import_backup);
+
         resetProgressButton.setOnClickListener(v -> confirmResetProgress());
+        exportBackupButton.setOnClickListener(v -> exportBackup());
+        importBackupButton.setOnClickListener(v -> importBackup());
 
         favoritesFilterButton.setOnClickListener(v -> {
             favoritesOnly = !favoritesOnly;
@@ -175,6 +187,137 @@ public class MainActivity extends Activity {
             updateLessonButtonLabels();
             applyFilters();
         }
+    }
+
+    private void exportBackup() {
+        Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        intent.setType("application/json");
+        intent.putExtra(Intent.EXTRA_TITLE, "net-hunter-backup.json");
+        startActivityForResult(intent, REQ_EXPORT_BACKUP);
+    }
+
+    private void importBackup() {
+        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        intent.setType("application/json");
+        startActivityForResult(intent, REQ_IMPORT_BACKUP);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (resultCode != RESULT_OK || data == null || data.getData() == null) {
+            return;
+        }
+
+        Uri uri = data.getData();
+
+        if (requestCode == REQ_EXPORT_BACKUP) {
+            writeBackup(uri);
+        } else if (requestCode == REQ_IMPORT_BACKUP) {
+            readBackup(uri);
+        }
+    }
+
+    private void writeBackup(Uri uri) {
+        try {
+            SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+            JSONObject root = new JSONObject();
+            root.put("format", "net-hunter-backup");
+            root.put("version", 1);
+
+            JSONObject values = new JSONObject();
+            for (Map.Entry<String, ?> entry : prefs.getAll().entrySet()) {
+                Object value = entry.getValue();
+                if (value instanceof String
+                        || value instanceof Boolean
+                        || value instanceof Integer
+                        || value instanceof Long
+                        || value instanceof Float) {
+                    values.put(entry.getKey(), value);
+                }
+            }
+
+            root.put("preferences", values);
+
+            try (java.io.OutputStream output = getContentResolver().openOutputStream(uri)) {
+                if (output == null) {
+                    throw new IllegalStateException("Could not open backup file.");
+                }
+                output.write(root.toString(2).getBytes(java.nio.charset.StandardCharsets.UTF_8));
+            }
+
+            Toast.makeText(this, R.string.backup_exported, Toast.LENGTH_SHORT).show();
+        } catch (Exception e) {
+            Toast.makeText(this, R.string.backup_export_failed, Toast.LENGTH_LONG).show();
+        }
+    }
+
+    private void readBackup(Uri uri) {
+        try {
+            StringBuilder text = new StringBuilder();
+
+            try (java.io.BufferedReader reader = new java.io.BufferedReader(
+                    new java.io.InputStreamReader(
+                            getContentResolver().openInputStream(uri),
+                            java.nio.charset.StandardCharsets.UTF_8))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    text.append(line);
+                }
+            }
+
+            JSONObject root = new JSONObject(text.toString());
+            if (!"net-hunter-backup".equals(root.optString("format"))) {
+                throw new IllegalArgumentException("Unsupported backup format.");
+            }
+
+            JSONObject values = root.getJSONObject("preferences");
+            SharedPreferences.Editor editor =
+                    getSharedPreferences(PREFS_NAME, MODE_PRIVATE).edit();
+
+            java.util.Iterator<String> keys = values.keys();
+            while (keys.hasNext()) {
+                String key = keys.next();
+                Object value = values.get(key);
+
+                if (value instanceof Boolean) {
+                    editor.putBoolean(key, (Boolean) value);
+                } else if (value instanceof Integer) {
+                    editor.putInt(key, (Integer) value);
+                } else if (value instanceof Long) {
+                    editor.putLong(key, (Long) value);
+                } else if (value instanceof Double) {
+                    double number = (Double) value;
+                    if (number == Math.rint(number)
+                            && number >= Integer.MIN_VALUE
+                            && number <= Integer.MAX_VALUE) {
+                        editor.putInt(key, (int) number);
+                    } else {
+                        editor.putFloat(key, (float) number);
+                    }
+                } else {
+                    editor.putString(key, String.valueOf(value));
+                }
+            }
+
+            editor.apply();
+            refreshHomeState();
+            Toast.makeText(this, R.string.backup_imported, Toast.LENGTH_SHORT).show();
+        } catch (Exception e) {
+            Toast.makeText(this, R.string.backup_import_failed, Toast.LENGTH_LONG).show();
+        }
+    }
+
+    private void refreshHomeState() {
+        updateContinueButton();
+        updateProgress();
+        updateFavoritesUi();
+        updateNotesUi();
+        updateLessonButtonLabels();
+        applyFilters();
     }
 
     private void confirmResetProgress() {
