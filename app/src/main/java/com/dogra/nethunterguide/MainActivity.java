@@ -38,7 +38,7 @@ public class MainActivity extends Activity {
         bindLesson(R.id.btn_about, "About & Safety", "about-safety.txt");
 
         TextView appMeta = findViewById(R.id.app_meta);
-        appMeta.setText(getString(R.string.app_meta_format, BuildConfig.VERSION_NAME, lessonButtons.size()));
+        appMeta.setText(getString(R.string.app_meta_format, getAppVersionName(), lessonButtons.size()));
 
         EditText search = findViewById(R.id.search_lessons);
         search.addTextChangedListener(new TextWatcher() {
@@ -53,6 +53,16 @@ public class MainActivity extends Activity {
             @Override
             public void afterTextChanged(Editable s) { }
         });
+    }
+
+    private String getAppVersionName() {
+        try {
+            return getPackageManager()
+                    .getPackageInfo(getPackageName(), 0)
+                    .versionName;
+        } catch (Exception e) {
+            return getString(R.string.unknown_version);
+        }
     }
 
     private void bindLesson(int buttonId, String title, String assetName) {
