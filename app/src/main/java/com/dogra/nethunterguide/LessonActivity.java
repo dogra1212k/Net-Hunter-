@@ -7,6 +7,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.ScrollView;
 import android.widget.Toast;
 
 import java.io.BufferedReader;
@@ -31,6 +32,7 @@ public class LessonActivity extends Activity {
     private EditText noteInput;
     private TextView titleView;
     private TextView contentView;
+    private ScrollView lessonScroll;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,6 +47,7 @@ public class LessonActivity extends Activity {
         Button saveNoteButton = findViewById(R.id.btn_save_note);
         titleView = findViewById(R.id.lesson_title);
         contentView = findViewById(R.id.lesson_content);
+        lessonScroll = findViewById(R.id.lesson_scroll);
         noteInput = findViewById(R.id.lesson_note);
 
         backButton.setOnClickListener(v -> finish());
@@ -66,6 +69,7 @@ public class LessonActivity extends Activity {
         super.onPause();
         if (assetName != null && noteInput != null) {
             persistNote(noteInput.getText().toString());
+            persistScrollPosition();
         }
     }
 
@@ -78,10 +82,12 @@ public class LessonActivity extends Activity {
         loadNote();
         updateNavigationButtons();
         rememberCurrentLesson();
+        restoreScrollPosition();
     }
 
     private void moveLesson(int direction) {
         persistNote(noteInput.getText().toString());
+        persistScrollPosition();
 
         int currentIndex = LessonCatalog.indexOfAsset(assetName);
         int nextIndex = currentIndex + direction;
@@ -129,6 +135,28 @@ public class LessonActivity extends Activity {
                 .putString(PREF_LAST_TITLE, lessonTitle)
                 .putString(PREF_LAST_ASSET, assetName)
                 .apply();
+    }
+
+    private void persistScrollPosition() {
+        if (assetName == null || lessonScroll == null) {
+            return;
+        }
+
+        getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
+                .edit()
+                .putInt("scroll_" + assetName, lessonScroll.getScrollY())
+                .apply();
+    }
+
+    private void restoreScrollPosition() {
+        if (assetName == null || lessonScroll == null) {
+            return;
+        }
+
+        int savedY = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
+                .getInt("scroll_" + assetName, 0);
+
+        lessonScroll.post(() -> lessonScroll.scrollTo(0, Math.max(savedY, 0)));
     }
 
     private void toggleComplete() {
