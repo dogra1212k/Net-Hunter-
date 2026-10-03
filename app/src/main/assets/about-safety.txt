@@ -1,0 +1,36 @@
+ABOUT & SAFETY
+==============
+
+Net Hunter Guide is an offline learning companion for Termux, Kali Linux and NetHunter basics.
+
+WHAT THIS APP IS FOR
+- Learning Linux commands
+- Understanding networking
+- Practicing on localhost
+- Reading tool notes
+- Running safe labs
+- Building troubleshooting habits
+
+SAFE USE
+Use commands and security tools only on:
+- your own device
+- localhost
+- your own lab
+- systems where you have explicit permission
+
+GOOD PRACTICE
+- Read --help and man pages first.
+- Understand what a command does before running it.
+- Keep backups of important files.
+- Record your lab steps and results.
+- Learn remediation as well as detection.
+- Do not use random commands copied from the internet blindly. Humanity has already suffered enough from that habit.
+
+APP BEHAVIOR
+Lessons are bundled inside the app and open in the app itself.
+The home screen search filters lesson buttons by title.
+No browser is required for offline lesson reading.
+
+PROJECT
+Package: com.dogra.nethunterguide
+Version: 1.1.0
