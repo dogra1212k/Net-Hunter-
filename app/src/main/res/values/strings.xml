@@ -24,6 +24,11 @@
     <string name="progress_format">Progress: %1$d/%2$d completed</string>
     <string name="mark_complete">Mark complete</string>
     <string name="completed">✓ Completed</string>
+    <string name="reset_progress">Reset progress</string>
+    <string name="reset_progress_title">Reset learning progress?</string>
+    <string name="reset_progress_message">This clears all completed lesson marks. Your last opened lesson will stay saved.</string>
+    <string name="reset">Reset</string>
+    <string name="cancel">Cancel</string>
     <string name="lesson_load_error">Lesson could not be loaded.</string>
     <string name="back_to_home">← Back to Net Hunter</string>
     <string name="safety">Authorized labs • your own devices • localhost</string>
