@@ -19,6 +19,7 @@ public class LessonActivity extends Activity {
 
     private String assetName;
     private Button completeButton;
+    private Button favoriteButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,6 +28,7 @@ public class LessonActivity extends Activity {
 
         Button backButton = findViewById(R.id.btn_back);
         completeButton = findViewById(R.id.btn_complete);
+        favoriteButton = findViewById(R.id.btn_favorite);
         TextView title = findViewById(R.id.lesson_title);
         TextView content = findViewById(R.id.lesson_content);
 
@@ -39,7 +41,10 @@ public class LessonActivity extends Activity {
         content.setText(readAsset(assetName));
 
         updateCompleteButton();
+        updateFavoriteButton();
+
         completeButton.setOnClickListener(v -> toggleComplete());
+        favoriteButton.setOnClickListener(v -> toggleFavorite());
     }
 
     private void toggleComplete() {
@@ -54,6 +59,18 @@ public class LessonActivity extends Activity {
         updateCompleteButton();
     }
 
+    private void toggleFavorite() {
+        if (assetName == null) {
+            return;
+        }
+
+        SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        String key = "favorite_" + assetName;
+        boolean next = !prefs.getBoolean(key, false);
+        prefs.edit().putBoolean(key, next).apply();
+        updateFavoriteButton();
+    }
+
     private void updateCompleteButton() {
         if (assetName == null) {
             completeButton.setEnabled(false);
@@ -64,6 +81,18 @@ public class LessonActivity extends Activity {
         boolean completed = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
                 .getBoolean("completed_" + assetName, false);
         completeButton.setText(completed ? R.string.completed : R.string.mark_complete);
+    }
+
+    private void updateFavoriteButton() {
+        if (assetName == null) {
+            favoriteButton.setEnabled(false);
+            favoriteButton.setText(R.string.add_favorite);
+            return;
+        }
+
+        boolean favorite = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
+                .getBoolean("favorite_" + assetName, false);
+        favoriteButton.setText(favorite ? R.string.favorite_added : R.string.add_favorite);
     }
 
     private String readAsset(String assetName) {
