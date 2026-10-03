@@ -7,6 +7,11 @@
     <string name="open_command_guide">Read command lessons</string>
     <string name="open_install_guide">Read installation guide</string>
     <string name="open_tools_guide">Read Kali tools notes</string>
-    <string name="lesson_load_error">Lesson could not be loaded.</string>\n    <string name="back_to_home">← Back to Net Hunter</string>
+    <string name="open_linux_basics">Learn Linux basics</string>
+    <string name="open_network_basics">Learn network basics</string>
+    <string name="open_web_basics">Learn web basics</string>
+    <string name="open_forensics_basics">Learn forensics basics</string>
+    <string name="lesson_load_error">Lesson could not be loaded.</string>
+    <string name="back_to_home">← Back to Net Hunter</string>
     <string name="safety">Authorized labs • your own devices • localhost</string>
 </resources>
