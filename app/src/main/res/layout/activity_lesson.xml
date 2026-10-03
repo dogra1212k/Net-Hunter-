@@ -73,6 +73,30 @@
             android:text="@string/save_note"
             android:textAllCaps="false" />
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/btn_previous_lesson"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/previous_lesson"
+                android:textAllCaps="false" />
+
+            <Button
+                android:id="@+id/btn_next_lesson"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_weight="1"
+                android:text="@string/next_lesson"
+                android:textAllCaps="false" />
+        </LinearLayout>
+
         <TextView
             android:id="@+id/lesson_content"
             android:layout_width="match_parent"
