@@ -40,6 +40,8 @@ public class MainActivity extends Activity {
     private TextView progressText;
     private TextView favoritesText;
     private TextView notesText;
+    private TextView visibleLessonsText;
+    private EditText searchInput;
     private boolean favoritesOnly = false;
     private boolean notesOnly = false;
     private boolean incompleteOnly = false;
@@ -77,6 +79,7 @@ public class MainActivity extends Activity {
         progressText = findViewById(R.id.progress_text);
         favoritesText = findViewById(R.id.favorites_text);
         notesText = findViewById(R.id.notes_text);
+        visibleLessonsText = findViewById(R.id.visible_lessons_text);
         favoritesFilterButton = findViewById(R.id.btn_filter_favorites);
         notesFilterButton = findViewById(R.id.btn_filter_notes);
         incompleteFilterButton = findViewById(R.id.btn_filter_incomplete);
@@ -84,10 +87,12 @@ public class MainActivity extends Activity {
         Button resetProgressButton = findViewById(R.id.btn_reset_progress);
         Button exportBackupButton = findViewById(R.id.btn_export_backup);
         Button importBackupButton = findViewById(R.id.btn_import_backup);
+        Button clearFiltersButton = findViewById(R.id.btn_clear_filters);
 
         resetProgressButton.setOnClickListener(v -> confirmResetProgress());
         exportBackupButton.setOnClickListener(v -> exportBackup());
         importBackupButton.setOnClickListener(v -> importBackup());
+        clearFiltersButton.setOnClickListener(v -> clearFilters());
 
         favoritesFilterButton.setOnClickListener(v -> {
             favoritesOnly = !favoritesOnly;
@@ -117,8 +122,8 @@ public class MainActivity extends Activity {
         TextView appMeta = findViewById(R.id.app_meta);
         appMeta.setText(getString(R.string.app_meta_format, getAppVersionName(), lessonButtons.size()));
 
-        EditText search = findViewById(R.id.search_lessons);
-        search.addTextChangedListener(new TextWatcher() {
+        searchInput = findViewById(R.id.search_lessons);
+        searchInput.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
 
@@ -207,6 +212,22 @@ public class MainActivity extends Activity {
             updateLessonButtonLabels();
             applyFilters();
         }
+    }
+
+    private void clearFilters() {
+        favoritesOnly = false;
+        notesOnly = false;
+        incompleteOnly = false;
+        currentQuery = "";
+
+        if (searchInput != null) {
+            searchInput.setText("");
+        }
+
+        updateFavoritesUi();
+        updateNotesUi();
+        updateIncompleteUi();
+        applyFilters();
     }
 
     private void exportBackup() {
@@ -413,6 +434,8 @@ public class MainActivity extends Activity {
     private void updateLessonButtonLabels() {
         SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
 
+        int visibleCount = 0;
+
         for (int i = 0; i < lessonButtons.size(); i++) {
             String title = lessonTitles.get(i);
             String asset = lessonAssets.get(i);
@@ -452,10 +475,20 @@ public class MainActivity extends Activity {
             boolean completed = prefs.getBoolean("completed_" + asset, false);
             boolean matchesIncomplete = !incompleteOnly || !completed;
 
-            lessonButtons.get(i).setVisibility(
-                    matchesQuery && matchesFavorite && matchesNote && matchesIncomplete
-                            ? View.VISIBLE
-                            : View.GONE
+            boolean visible = matchesQuery
+                    && matchesFavorite
+                    && matchesNote
+                    && matchesIncomplete;
+
+            lessonButtons.get(i).setVisibility(visible ? View.VISIBLE : View.GONE);
+            if (visible) {
+                visibleCount++;
+            }
+        }
+
+        if (visibleLessonsText != null) {
+            visibleLessonsText.setText(
+                    getString(R.string.visible_lessons_format, visibleCount, lessonButtons.size())
             );
         }
     }
