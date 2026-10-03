@@ -85,7 +85,33 @@ jobs:
         env:
           PLAY_UPLOAD_KEYSTORE_B64: ${{ secrets.PLAY_UPLOAD_KEYSTORE_B64 }}
         run: |
-          echo "$PLAY_UPLOAD_KEYSTORE_B64" | base64 --decode > "$RUNNER_TEMP/net-hunter-upload.jks"
+          raw=$(printf '%s' "$PLAY_UPLOAD_KEYSTORE_B64" | tr -d '\r\n\t ')
+          raw="${raw#PLAY_UPLOAD_KEYSTORE_B64=}"
+          raw="${raw#data:application/octet-stream;base64,}"
+          raw="${raw#data:application/x-java-keystore;base64,}"
+          raw="${raw#\"}"
+          raw="${raw%\"}"
+          raw=$(printf '%s' "$raw" | tr '_-' '/+')
+
+          remainder=$(( ${#raw} % 4 ))
+          if [ "$remainder" -eq 2 ]; then
+            raw="${raw}=="
+          elif [ "$remainder" -eq 3 ]; then
+            raw="${raw}="
+          elif [ "$remainder" -eq 1 ]; then
+            echo "::error::PLAY_UPLOAD_KEYSTORE_B64 has an invalid base64 length. Regenerate it with scripts/create-play-upload-key.sh."
+            exit 1
+          fi
+
+          if ! printf '%s' "$raw" | base64 --decode > "$RUNNER_TEMP/net-hunter-upload.jks"; then
+            echo "::error::PLAY_UPLOAD_KEYSTORE_B64 is not valid base64. Regenerate it with scripts/create-play-upload-key.sh."
+            exit 1
+          fi
+
+          if [ ! -s "$RUNNER_TEMP/net-hunter-upload.jks" ]; then
+            echo "::error::Decoded Play upload keystore is empty."
+            exit 1
+          fi
 
       - name: Build installable debug APK
         if: env.HAS_PLAY_KEY != 'true'
