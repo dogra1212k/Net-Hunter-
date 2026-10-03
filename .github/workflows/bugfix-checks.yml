@@ -1,0 +1,25 @@
+name: Bugfix regression checks
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Backup regression tests
+        run: bash scripts/test-backup.sh
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '9.6.0'
+      - name: Android lint and debug build
+        run: gradle :app:testDebugUnitTest :app:lintDebug :app:assembleDebug

@@ -43,7 +43,7 @@ Current app features:
 - no browser required for offline lesson reading;
 - automated unit-test gate in CI for lesson catalog integrity.
 
-Current app version: **2.8.0**
+Current app version: **2.8.1**
 Package: **com.dogra.nethunterguide**
 
 ## Download / Build

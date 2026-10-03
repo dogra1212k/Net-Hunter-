@@ -115,6 +115,9 @@ jobs:
           echo "PLAY_UPLOAD_KEY_ALIAS=$alias_name" >> "$GITHUB_ENV"
           echo "Signing status: ready (alias: $alias_name)" >> "$GITHUB_STEP_SUMMARY"
 
+      - name: Backup regression tests
+        run: bash scripts/test-backup.sh
+
       - name: Run unit tests
         run: gradle :app:testDebugUnitTest
 

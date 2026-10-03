@@ -3,6 +3,7 @@ package com.dogra.nethunterguide;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Intent;
+import android.content.ActivityNotFoundException;
 import android.net.Uri;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -29,7 +30,6 @@ public class MainActivity extends Activity {
     private static final int REQ_EXPORT_BACKUP = 1001;
     private static final int REQ_IMPORT_BACKUP = 1002;
     private static final int BACKUP_FORMAT_VERSION = 1;
-    private static final int MAX_BACKUP_CHARS = 1_000_000;
     private static final String STATE_QUERY = "state_query";
     private static final String STATE_FAVORITES_ONLY = "state_favorites_only";
     private static final String STATE_NOTES_ONLY = "state_notes_only";
@@ -206,7 +206,7 @@ public class MainActivity extends Activity {
         String title = prefs.getString(PREF_LAST_TITLE, null);
         String asset = prefs.getString(PREF_LAST_ASSET, null);
 
-        if (title == null || asset == null) {
+        if (title == null || !lessonAssets.contains(asset)) {
             continueButton.setVisibility(View.GONE);
             continueButton.setOnClickListener(null);
             return;
@@ -264,14 +264,22 @@ public class MainActivity extends Activity {
         intent.addCategory(Intent.CATEGORY_OPENABLE);
         intent.setType("application/json");
         intent.putExtra(Intent.EXTRA_TITLE, "net-hunter-backup.json");
-        startActivityForResult(intent, REQ_EXPORT_BACKUP);
+        launchBackupPicker(intent, REQ_EXPORT_BACKUP);
     }
 
     private void importBackup() {
         Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
         intent.addCategory(Intent.CATEGORY_OPENABLE);
         intent.setType("application/json");
-        startActivityForResult(intent, REQ_IMPORT_BACKUP);
+        launchBackupPicker(intent, REQ_IMPORT_BACKUP);
+    }
+
+    private void launchBackupPicker(Intent intent, int requestCode) {
+        try {
+            startActivityForResult(intent, requestCode);
+        } catch (ActivityNotFoundException | SecurityException e) {
+            Toast.makeText(this, R.string.backup_picker_unavailable, Toast.LENGTH_LONG).show();
+        }
     }
 
     @Override
@@ -312,7 +320,7 @@ public class MainActivity extends Activity {
 
             root.put("preferences", values);
 
-            try (java.io.OutputStream output = getContentResolver().openOutputStream(uri)) {
+            try (java.io.OutputStream output = getContentResolver().openOutputStream(uri, "wt")) {
                 if (output == null) {
                     throw new IllegalStateException("Could not open backup file.");
                 }
@@ -337,7 +345,7 @@ public class MainActivity extends Activity {
                 int read;
                 while ((read = reader.read(buffer)) != -1) {
                     text.append(buffer, 0, read);
-                    if (text.length() > MAX_BACKUP_CHARS) {
+                    if (text.length() > BackupPreferences.MAX_BACKUP_CHARS) {
                         throw new IllegalArgumentException("Backup file is too large.");
                     }
                 }
@@ -350,65 +358,27 @@ public class MainActivity extends Activity {
             }
 
             JSONObject values = root.getJSONObject("preferences");
-            SharedPreferences.Editor editor =
-                    getSharedPreferences(PREFS_NAME, MODE_PRIVATE).edit().clear();
-
-            String restoredLastAsset = null;
-
+            Map<String, Object> imported = new java.util.LinkedHashMap<>();
             java.util.Iterator<String> keys = values.keys();
             while (keys.hasNext()) {
                 String key = keys.next();
-                Object value = values.get(key);
-
-                if (PREF_LAST_ASSET.equals(key) && value instanceof String) {
-                    String asset = (String) value;
-                    if (LessonCatalog.indexOfAsset(asset) >= 0) {
-                        restoredLastAsset = asset;
-                        editor.putString(PREF_LAST_ASSET, asset);
-                    }
-                    continue;
-                }
-
-                if (PREF_LAST_TITLE.equals(key)) {
-                    continue;
-                }
-
-                if ("lesson_text_size".equals(key) && value instanceof Number) {
-                    float size = ((Number) value).floatValue();
-                    size = Math.max(12f, Math.min(24f, size));
-                    editor.putFloat(key, size);
-                    continue;
-                }
-
-                if (("quiz_best_score".equals(key) || "quiz_last_score".equals(key))
-                        && value instanceof Number) {
-                    int score = Math.max(0, Math.min(5, ((Number) value).intValue()));
-                    editor.putInt(key, score);
-                    continue;
-                }
-
-                String asset = assetFromStateKey(key);
-                if (asset == null) {
-                    continue;
-                }
-
-                if (key.startsWith("completed_") || key.startsWith("favorite_")) {
-                    if (value instanceof Boolean) {
-                        editor.putBoolean(key, (Boolean) value);
-                    }
-                } else if (key.startsWith("scroll_") && value instanceof Number) {
-                    editor.putInt(key, Math.max(0, ((Number) value).intValue()));
-                } else if (key.startsWith("note_") && value instanceof String) {
-                    String note = (String) value;
-                    if (note.length() <= 100_000) {
-                        editor.putString(key, note);
-                    }
-                }
+                imported.put(key, values.get(key));
             }
-
-            if (restoredLastAsset != null) {
-                int index = LessonCatalog.indexOfAsset(restoredLastAsset);
-                editor.putString(PREF_LAST_TITLE, LessonCatalog.TITLES[index]);
+            Map<String, Object> validated = BackupPreferences.validate(
+                    root.get("version"), imported, lessonAssets, lessonTitles);
+            SharedPreferences.Editor editor =
+                    getSharedPreferences(PREFS_NAME, MODE_PRIVATE).edit().clear();
+            for (Map.Entry<String, Object> entry : validated.entrySet()) {
+                Object value = entry.getValue();
+                if (value instanceof Boolean) {
+                    editor.putBoolean(entry.getKey(), (Boolean) value);
+                } else if (value instanceof Integer) {
+                    editor.putInt(entry.getKey(), (Integer) value);
+                } else if (value instanceof Float) {
+                    editor.putFloat(entry.getKey(), (Float) value);
+                } else {
+                    editor.putString(entry.getKey(), (String) value);
+                }
             }
 
             editor.apply();
@@ -417,19 +387,6 @@ public class MainActivity extends Activity {
         } catch (Exception e) {
             Toast.makeText(this, R.string.backup_import_failed, Toast.LENGTH_LONG).show();
         }
-    }
-
-    private String assetFromStateKey(String key) {
-        String[] prefixes = {"completed_", "favorite_", "scroll_", "note_"};
-
-        for (String prefix : prefixes) {
-            if (key.startsWith(prefix)) {
-                String asset = key.substring(prefix.length());
-                return LessonCatalog.indexOfAsset(asset) >= 0 ? asset : null;
-            }
-        }
-
-        return null;
     }
 
     private void refreshHomeState() {
