@@ -46,6 +46,23 @@
             android:textSize="14sp"
             android:textStyle="bold" />
 
+        <TextView
+            android:id="@+id/favorites_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:gravity="center"
+            android:textColor="@color/text_primary"
+            android:textSize="14sp" />
+
+        <Button
+            android:id="@+id/btn_filter_favorites"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/show_favorites_only"
+            android:textAllCaps="false" />
+
         <Button
             android:id="@+id/btn_reset_progress"
             android:layout_width="wrap_content"
@@ -93,109 +110,19 @@
             android:textColor="@color/text_primary"
             android:textColorHint="@color/text_secondary" />
 
-        <Button
-            android:id="@+id/btn_commands"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
-            android:text="@string/open_command_guide"
-            android:textAllCaps="false" />
-
-        <Button
-            android:id="@+id/btn_install"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:text="@string/open_install_guide"
-            android:textAllCaps="false" />
-
-        <Button
-            android:id="@+id/btn_tools"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:text="@string/open_tools_guide"
-            android:textAllCaps="false" />
-
-        <Button
-            android:id="@+id/btn_linux"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:text="@string/open_linux_basics"
-            android:textAllCaps="false" />
-
-        <Button
-            android:id="@+id/btn_network"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:text="@string/open_network_basics"
-            android:textAllCaps="false" />
-
-        <Button
-            android:id="@+id/btn_web"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:text="@string/open_web_basics"
-            android:textAllCaps="false" />
-
-        <Button
-            android:id="@+id/btn_forensics"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:text="@string/open_forensics_basics"
-            android:textAllCaps="false" />
-
-        <Button
-            android:id="@+id/btn_roadmap"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:text="@string/open_learning_roadmap"
-            android:textAllCaps="false" />
-
-        <Button
-            android:id="@+id/btn_categories"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:text="@string/open_tool_categories"
-            android:textAllCaps="false" />
-
-        <Button
-            android:id="@+id/btn_reference"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:text="@string/open_command_reference"
-            android:textAllCaps="false" />
-
-        <Button
-            android:id="@+id/btn_troubleshooting"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:text="@string/open_troubleshooting"
-            android:textAllCaps="false" />
-
-        <Button
-            android:id="@+id/btn_labs"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:text="@string/open_practice_labs"
-            android:textAllCaps="false" />
-
-        <Button
-            android:id="@+id/btn_about"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:text="@string/open_about_safety"
-            android:textAllCaps="false" />
+        <Button android:id="@+id/btn_commands" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="24dp" android:text="@string/open_command_guide" android:textAllCaps="false" />
+        <Button android:id="@+id/btn_install" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="10dp" android:text="@string/open_install_guide" android:textAllCaps="false" />
+        <Button android:id="@+id/btn_tools" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="10dp" android:text="@string/open_tools_guide" android:textAllCaps="false" />
+        <Button android:id="@+id/btn_linux" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="10dp" android:text="@string/open_linux_basics" android:textAllCaps="false" />
+        <Button android:id="@+id/btn_network" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="10dp" android:text="@string/open_network_basics" android:textAllCaps="false" />
+        <Button android:id="@+id/btn_web" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="10dp" android:text="@string/open_web_basics" android:textAllCaps="false" />
+        <Button android:id="@+id/btn_forensics" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="10dp" android:text="@string/open_forensics_basics" android:textAllCaps="false" />
+        <Button android:id="@+id/btn_roadmap" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="10dp" android:text="@string/open_learning_roadmap" android:textAllCaps="false" />
+        <Button android:id="@+id/btn_categories" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="10dp" android:text="@string/open_tool_categories" android:textAllCaps="false" />
+        <Button android:id="@+id/btn_reference" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="10dp" android:text="@string/open_command_reference" android:textAllCaps="false" />
+        <Button android:id="@+id/btn_troubleshooting" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="10dp" android:text="@string/open_troubleshooting" android:textAllCaps="false" />
+        <Button android:id="@+id/btn_labs" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="10dp" android:text="@string/open_practice_labs" android:textAllCaps="false" />
+        <Button android:id="@+id/btn_about" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="10dp" android:text="@string/open_about_safety" android:textAllCaps="false" />
 
         <TextView
             android:layout_width="match_parent"
