@@ -3,6 +3,7 @@ package com.dogra.nethunterguide;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Intent;
+import android.content.ActivityNotFoundException;
 import android.net.Uri;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -47,6 +48,10 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        if (savedInstanceState != null) {
+            favoritesOnly = savedInstanceState.getBoolean("favorites_only", false);
+            notesOnly = savedInstanceState.getBoolean("notes_only", false);
+        }
 
         bindLesson(R.id.btn_commands, "Command Lessons", "commands.txt");
         bindLesson(R.id.btn_install, "Installation Guide", "install.txt");
@@ -156,7 +161,7 @@ public class MainActivity extends Activity {
         String title = prefs.getString(PREF_LAST_TITLE, null);
         String asset = prefs.getString(PREF_LAST_ASSET, null);
 
-        if (title == null || asset == null) {
+        if (title == null || !lessonAssets.contains(asset)) {
             continueButton.setVisibility(View.GONE);
             continueButton.setOnClickListener(null);
             return;
@@ -189,19 +194,34 @@ public class MainActivity extends Activity {
         }
     }
 
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        outState.putBoolean("favorites_only", favoritesOnly);
+        outState.putBoolean("notes_only", notesOnly);
+        super.onSaveInstanceState(outState);
+    }
+
     private void exportBackup() {
         Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
         intent.addCategory(Intent.CATEGORY_OPENABLE);
         intent.setType("application/json");
         intent.putExtra(Intent.EXTRA_TITLE, "net-hunter-backup.json");
-        startActivityForResult(intent, REQ_EXPORT_BACKUP);
+        launchBackupPicker(intent, REQ_EXPORT_BACKUP);
     }
 
     private void importBackup() {
         Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
         intent.addCategory(Intent.CATEGORY_OPENABLE);
         intent.setType("application/json");
-        startActivityForResult(intent, REQ_IMPORT_BACKUP);
+        launchBackupPicker(intent, REQ_IMPORT_BACKUP);
+    }
+
+    private void launchBackupPicker(Intent intent, int requestCode) {
+        try {
+            startActivityForResult(intent, requestCode);
+        } catch (ActivityNotFoundException | SecurityException e) {
+            Toast.makeText(this, R.string.backup_picker_unavailable, Toast.LENGTH_LONG).show();
+        }
     }
 
     @Override
@@ -242,7 +262,7 @@ public class MainActivity extends Activity {
 
             root.put("preferences", values);
 
-            try (java.io.OutputStream output = getContentResolver().openOutputStream(uri)) {
+            try (java.io.OutputStream output = getContentResolver().openOutputStream(uri, "wt")) {
                 if (output == null) {
                     throw new IllegalStateException("Could not open backup file.");
                 }
@@ -263,9 +283,13 @@ public class MainActivity extends Activity {
                     new java.io.InputStreamReader(
                             getContentResolver().openInputStream(uri),
                             java.nio.charset.StandardCharsets.UTF_8))) {
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    text.append(line);
+                char[] buffer = new char[4096];
+                int count;
+                while ((count = reader.read(buffer)) != -1) {
+                    if (text.length() + count > BackupPreferences.MAX_BACKUP_CHARS) {
+                        throw new IllegalArgumentException("Backup is too large.");
+                    }
+                    text.append(buffer, 0, count);
                 }
             }
 
@@ -275,31 +299,24 @@ public class MainActivity extends Activity {
             }
 
             JSONObject values = root.getJSONObject("preferences");
-            SharedPreferences.Editor editor =
-                    getSharedPreferences(PREFS_NAME, MODE_PRIVATE).edit();
-
+            Map<String, Object> imported = new java.util.LinkedHashMap<>();
             java.util.Iterator<String> keys = values.keys();
             while (keys.hasNext()) {
                 String key = keys.next();
-                Object value = values.get(key);
-
+                imported.put(key, values.get(key));
+            }
+            Map<String, Object> validated = BackupPreferences.validate(
+                    root.get("version"), imported, lessonAssets, lessonTitles);
+            SharedPreferences.Editor editor =
+                    getSharedPreferences(PREFS_NAME, MODE_PRIVATE).edit();
+            for (Map.Entry<String, Object> entry : validated.entrySet()) {
+                Object value = entry.getValue();
                 if (value instanceof Boolean) {
-                    editor.putBoolean(key, (Boolean) value);
+                    editor.putBoolean(entry.getKey(), (Boolean) value);
                 } else if (value instanceof Integer) {
-                    editor.putInt(key, (Integer) value);
-                } else if (value instanceof Long) {
-                    editor.putLong(key, (Long) value);
-                } else if (value instanceof Double) {
-                    double number = (Double) value;
-                    if (number == Math.rint(number)
-                            && number >= Integer.MIN_VALUE
-                            && number <= Integer.MAX_VALUE) {
-                        editor.putInt(key, (int) number);
-                    } else {
-                        editor.putFloat(key, (float) number);
-                    }
+                    editor.putInt(entry.getKey(), (Integer) value);
                 } else {
-                    editor.putString(key, String.valueOf(value));
+                    editor.putString(entry.getKey(), (String) value);
                 }
             }
 
