@@ -55,7 +55,14 @@ For a production Play Store APK/AAB, configure these repository secrets:
 - `PLAY_UPLOAD_KEY_ALIAS`
 - `PLAY_UPLOAD_KEY_PASSWORD`
 
-Without those secrets, the APK is an installable debug build and the release AAB is not production-signed.
+Without those secrets, the APK is an installable debug build and the release AAB is not production-signed. If only some signing secrets are configured, the workflow now fails early instead of silently producing an unsigned release.
+
+Generate and verify a dedicated upload key with:
+
+```bash
+bash scripts/create-play-upload-key.sh
+bash scripts/verify-play-upload-key.sh
+```
 
 See [Play Store Release Guide](docs/08-play-store-release.md).
 
