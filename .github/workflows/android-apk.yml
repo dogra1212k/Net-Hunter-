@@ -175,4 +175,9 @@ jobs:
             NOTES="Installable debug APK plus unsigned release AAB for Net Hunter Guide ${APP_VERSION}. Play signing is not currently valid/configured."
           fi
 
-          gh release create "$TAG" dist/*.apk dist/*.aab             --title "Net Hunter Guide ${APP_VERSION}"             --notes "$NOTES"
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" dist/*.apk dist/*.aab --clobber
+            gh release edit "$TAG" --title "Net Hunter Guide ${APP_VERSION}" --notes "$NOTES"
+          else
+            gh release create "$TAG" dist/*.apk dist/*.aab --title "Net Hunter Guide ${APP_VERSION}" --notes "$NOTES"
+          fi
