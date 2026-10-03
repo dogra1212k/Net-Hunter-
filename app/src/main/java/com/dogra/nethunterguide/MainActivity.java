@@ -434,8 +434,6 @@ public class MainActivity extends Activity {
     private void updateLessonButtonLabels() {
         SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
 
-        int visibleCount = 0;
-
         for (int i = 0; i < lessonButtons.size(); i++) {
             String title = lessonTitles.get(i);
             String asset = lessonAssets.get(i);
@@ -459,6 +457,7 @@ public class MainActivity extends Activity {
     private void applyFilters() {
         String normalized = currentQuery.trim().toLowerCase(Locale.ROOT);
         SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        int visibleCount = 0;
 
         for (int i = 0; i < lessonButtons.size(); i++) {
             String title = lessonTitles.get(i);
