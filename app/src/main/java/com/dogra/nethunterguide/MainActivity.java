@@ -29,6 +29,11 @@ public class MainActivity extends Activity {
     private static final String PREF_LAST_ASSET = "last_asset";
     private static final int REQ_EXPORT_BACKUP = 1001;
     private static final int REQ_IMPORT_BACKUP = 1002;
+    private static final int BACKUP_FORMAT_VERSION = 1;
+    private static final String STATE_QUERY = "state_query";
+    private static final String STATE_FAVORITES_ONLY = "state_favorites_only";
+    private static final String STATE_NOTES_ONLY = "state_notes_only";
+    private static final String STATE_INCOMPLETE_ONLY = "state_incomplete_only";
 
     private final List<Button> lessonButtons = new ArrayList<>();
     private final List<String> lessonAssets = new ArrayList<>();
@@ -37,21 +42,21 @@ public class MainActivity extends Activity {
     private Button continueButton;
     private Button favoritesFilterButton;
     private Button notesFilterButton;
+    private Button incompleteFilterButton;
     private TextView progressText;
     private TextView favoritesText;
     private TextView notesText;
+    private TextView visibleLessonsText;
+    private EditText searchInput;
     private boolean favoritesOnly = false;
     private boolean notesOnly = false;
+    private boolean incompleteOnly = false;
     private String currentQuery = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        if (savedInstanceState != null) {
-            favoritesOnly = savedInstanceState.getBoolean("favorites_only", false);
-            notesOnly = savedInstanceState.getBoolean("notes_only", false);
-        }
 
         int[] lessonButtonIds = {
                 R.id.btn_commands,
@@ -80,16 +85,28 @@ public class MainActivity extends Activity {
         progressText = findViewById(R.id.progress_text);
         favoritesText = findViewById(R.id.favorites_text);
         notesText = findViewById(R.id.notes_text);
+        visibleLessonsText = findViewById(R.id.visible_lessons_text);
         favoritesFilterButton = findViewById(R.id.btn_filter_favorites);
         notesFilterButton = findViewById(R.id.btn_filter_notes);
+        incompleteFilterButton = findViewById(R.id.btn_filter_incomplete);
+        searchInput = findViewById(R.id.search_lessons);
+
+        if (savedInstanceState != null) {
+            currentQuery = savedInstanceState.getString(STATE_QUERY, "");
+            favoritesOnly = savedInstanceState.getBoolean(STATE_FAVORITES_ONLY, false);
+            notesOnly = savedInstanceState.getBoolean(STATE_NOTES_ONLY, false);
+            incompleteOnly = savedInstanceState.getBoolean(STATE_INCOMPLETE_ONLY, false);
+        }
 
         Button resetProgressButton = findViewById(R.id.btn_reset_progress);
         Button exportBackupButton = findViewById(R.id.btn_export_backup);
         Button importBackupButton = findViewById(R.id.btn_import_backup);
+        Button clearFiltersButton = findViewById(R.id.btn_clear_filters);
 
         resetProgressButton.setOnClickListener(v -> confirmResetProgress());
         exportBackupButton.setOnClickListener(v -> exportBackup());
         importBackupButton.setOnClickListener(v -> importBackup());
+        clearFiltersButton.setOnClickListener(v -> clearFilters());
 
         favoritesFilterButton.setOnClickListener(v -> {
             favoritesOnly = !favoritesOnly;
@@ -103,17 +120,23 @@ public class MainActivity extends Activity {
             applyFilters();
         });
 
+        incompleteFilterButton.setOnClickListener(v -> {
+            incompleteOnly = !incompleteOnly;
+            updateIncompleteUi();
+            applyFilters();
+        });
+
         updateContinueButton();
         updateProgress();
         updateFavoritesUi();
         updateNotesUi();
+        updateIncompleteUi();
         updateLessonButtonLabels();
 
         TextView appMeta = findViewById(R.id.app_meta);
         appMeta.setText(getString(R.string.app_meta_format, getAppVersionName(), lessonButtons.size()));
 
-        EditText search = findViewById(R.id.search_lessons);
-        search.addTextChangedListener(new TextWatcher() {
+        searchInput.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
 
@@ -126,6 +149,22 @@ public class MainActivity extends Activity {
             @Override
             public void afterTextChanged(Editable s) { }
         });
+
+        if (!currentQuery.isEmpty()) {
+            searchInput.setText(currentQuery);
+            searchInput.setSelection(searchInput.length());
+        } else {
+            applyFilters();
+        }
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        outState.putString(STATE_QUERY, currentQuery);
+        outState.putBoolean(STATE_FAVORITES_ONLY, favoritesOnly);
+        outState.putBoolean(STATE_NOTES_ONLY, notesOnly);
+        outState.putBoolean(STATE_INCOMPLETE_ONLY, incompleteOnly);
+        super.onSaveInstanceState(outState);
     }
 
     private String getAppVersionName() {
@@ -193,18 +232,31 @@ public class MainActivity extends Activity {
         if (notesText != null && notesFilterButton != null) {
             updateNotesUi();
         }
+        if (incompleteFilterButton != null) {
+            updateIncompleteUi();
+        }
         if (favoritesText != null && favoritesFilterButton != null
-                && notesText != null && notesFilterButton != null) {
+                && notesText != null && notesFilterButton != null
+                && incompleteFilterButton != null) {
             updateLessonButtonLabels();
             applyFilters();
         }
     }
 
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        outState.putBoolean("favorites_only", favoritesOnly);
-        outState.putBoolean("notes_only", notesOnly);
-        super.onSaveInstanceState(outState);
+    private void clearFilters() {
+        favoritesOnly = false;
+        notesOnly = false;
+        incompleteOnly = false;
+        currentQuery = "";
+
+        if (searchInput != null) {
+            searchInput.setText("");
+        }
+
+        updateFavoritesUi();
+        updateNotesUi();
+        updateIncompleteUi();
+        applyFilters();
     }
 
     private void exportBackup() {
@@ -252,7 +304,7 @@ public class MainActivity extends Activity {
             SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
             JSONObject root = new JSONObject();
             root.put("format", "net-hunter-backup");
-            root.put("version", 1);
+            root.put("version", BACKUP_FORMAT_VERSION);
 
             JSONObject values = new JSONObject();
             for (Map.Entry<String, ?> entry : prefs.getAll().entrySet()) {
@@ -290,17 +342,18 @@ public class MainActivity extends Activity {
                             getContentResolver().openInputStream(uri),
                             java.nio.charset.StandardCharsets.UTF_8))) {
                 char[] buffer = new char[4096];
-                int count;
-                while ((count = reader.read(buffer)) != -1) {
-                    if (text.length() + count > BackupPreferences.MAX_BACKUP_CHARS) {
-                        throw new IllegalArgumentException("Backup is too large.");
+                int read;
+                while ((read = reader.read(buffer)) != -1) {
+                    text.append(buffer, 0, read);
+                    if (text.length() > BackupPreferences.MAX_BACKUP_CHARS) {
+                        throw new IllegalArgumentException("Backup file is too large.");
                     }
-                    text.append(buffer, 0, count);
                 }
             }
 
             JSONObject root = new JSONObject(text.toString());
-            if (!"net-hunter-backup".equals(root.optString("format"))) {
+            if (!"net-hunter-backup".equals(root.optString("format"))
+                    || root.optInt("version", -1) != BACKUP_FORMAT_VERSION) {
                 throw new IllegalArgumentException("Unsupported backup format.");
             }
 
@@ -314,13 +367,15 @@ public class MainActivity extends Activity {
             Map<String, Object> validated = BackupPreferences.validate(
                     root.get("version"), imported, lessonAssets, lessonTitles);
             SharedPreferences.Editor editor =
-                    getSharedPreferences(PREFS_NAME, MODE_PRIVATE).edit();
+                    getSharedPreferences(PREFS_NAME, MODE_PRIVATE).edit().clear();
             for (Map.Entry<String, Object> entry : validated.entrySet()) {
                 Object value = entry.getValue();
                 if (value instanceof Boolean) {
                     editor.putBoolean(entry.getKey(), (Boolean) value);
                 } else if (value instanceof Integer) {
                     editor.putInt(entry.getKey(), (Integer) value);
+                } else if (value instanceof Float) {
+                    editor.putFloat(entry.getKey(), (Float) value);
                 } else {
                     editor.putString(entry.getKey(), (String) value);
                 }
@@ -339,6 +394,7 @@ public class MainActivity extends Activity {
         updateProgress();
         updateFavoritesUi();
         updateNotesUi();
+        updateIncompleteUi();
         updateLessonButtonLabels();
         applyFilters();
     }
@@ -361,6 +417,7 @@ public class MainActivity extends Activity {
         editor.apply();
         updateProgress();
         updateLessonButtonLabels();
+        applyFilters();
     }
 
     private void updateProgress() {
@@ -406,6 +463,12 @@ public class MainActivity extends Activity {
         );
     }
 
+    private void updateIncompleteUi() {
+        incompleteFilterButton.setText(
+                incompleteOnly ? R.string.show_all_progress : R.string.show_incomplete_only
+        );
+    }
+
     private void updateLessonButtonLabels() {
         SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
 
@@ -432,6 +495,7 @@ public class MainActivity extends Activity {
     private void applyFilters() {
         String normalized = currentQuery.trim().toLowerCase(Locale.ROOT);
         SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        int visibleCount = 0;
 
         for (int i = 0; i < lessonButtons.size(); i++) {
             String title = lessonTitles.get(i);
@@ -445,11 +509,23 @@ public class MainActivity extends Activity {
             String note = prefs.getString("note_" + asset, "");
             boolean hasNote = note != null && !note.trim().isEmpty();
             boolean matchesNote = !notesOnly || hasNote;
+            boolean completed = prefs.getBoolean("completed_" + asset, false);
+            boolean matchesIncomplete = !incompleteOnly || !completed;
 
-            lessonButtons.get(i).setVisibility(
-                    matchesQuery && matchesFavorite && matchesNote
-                            ? View.VISIBLE
-                            : View.GONE
+            boolean visible = matchesQuery
+                    && matchesFavorite
+                    && matchesNote
+                    && matchesIncomplete;
+
+            lessonButtons.get(i).setVisibility(visible ? View.VISIBLE : View.GONE);
+            if (visible) {
+                visibleCount++;
+            }
+        }
+
+        if (visibleLessonsText != null) {
+            visibleLessonsText.setText(
+                    getString(R.string.visible_lessons_format, visibleCount, lessonButtons.size())
             );
         }
     }

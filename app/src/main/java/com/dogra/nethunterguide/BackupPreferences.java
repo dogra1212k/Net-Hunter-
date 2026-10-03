@@ -6,7 +6,7 @@ import java.util.Map;
 
 /** Validates a whole backup before any preferences are changed. */
 final class BackupPreferences {
-    static final int MAX_BACKUP_CHARS = 1024 * 1024;
+    static final int MAX_BACKUP_CHARS = 1_000_000;
 
     static Map<String, Object> validate(Object version, Map<String, Object> input,
                                        List<String> assets, List<String> titles) {
@@ -23,6 +23,14 @@ final class BackupPreferences {
                 require(value instanceof Integer);
                 int score = (Integer) value;
                 require(score >= (key.equals("quiz_last_score") ? -1 : 0) && score <= 5);
+            } else if (key.equals("lesson_text_size")) {
+                require(value instanceof Number);
+                float size = ((Number) value).floatValue();
+                require(Float.isFinite(size) && size >= 12f && size <= 24f);
+                value = size;
+            } else if (key.startsWith("scroll_")) {
+                require(assets.contains(key.substring(7)));
+                require(value instanceof Integer && (Integer) value >= 0);
             } else if (key.startsWith("completed_") || key.startsWith("favorite_")) {
                 require(assets.contains(key.substring(key.indexOf('_') + 1)));
                 require(value instanceof Boolean);

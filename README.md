@@ -17,8 +17,12 @@ Current app features:
 - home-screen ✓ completed and ★ favorite status markers;
 - per-lesson personal notes saved locally;
 - notes count plus show-notes-only filter on the home screen;
-- JSON backup/export and restore/import for local learning state;
+- validated JSON backup/export and restore/import for local learning state;
+- Android system/cloud backup disabled so local notes and progress stay under explicit user-controlled export/import;
 - home-screen progress counter;
+- show-incomplete-only lesson filter;
+- one-tap clear-filters control and visible lesson count;
+- home search/filter state retained across screen rotation;
 - confirmed progress reset;
 - Termux and Kali quick-start guidance;
 - Linux, networking, web/HTTP and forensics basics;
@@ -31,11 +35,15 @@ Current app features:
 - app version and lesson-count display;
 - in-app Back navigation;
 - previous/next lesson navigation with a central lesson catalog;
+- per-lesson reading position memory;
+- persistent lesson text-size controls;
+- copy and share lesson content from the lesson screen;
 - offline quick quiz with scoring, saved last score, best score, answer explanations and restart;
 - quiz progress retained across screen rotation;
-- no browser required for offline lesson reading.
+- no browser required for offline lesson reading;
+- automated unit-test gate in CI for lesson catalog integrity.
 
-Current app version: **2.0.0**
+Current app version: **2.8.1**
 Package: **com.dogra.nethunterguide**
 
 ## Download / Build
@@ -67,6 +75,11 @@ bash scripts/verify-play-upload-key.sh
 ```
 
 See [Play Store Release Guide](docs/08-play-store-release.md).
+
+Additional publishing docs:
+
+- [Privacy Policy](docs/09-privacy-policy.md)
+- [Play Store Listing Draft](docs/10-play-store-listing.md)
 
 ## Start here
 

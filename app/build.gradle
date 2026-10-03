@@ -10,8 +10,8 @@ android {
         applicationId "com.dogra.nethunterguide"
         minSdk 24
         targetSdk 37
-        versionCode 13
-        versionName "2.0.1"
+        versionCode 21
+        versionName "2.8.1"
     }
 
     signingConfigs {
@@ -43,4 +43,9 @@ android {
         sourceCompatibility JavaVersion.VERSION_17
         targetCompatibility JavaVersion.VERSION_17
     }
+}
+
+
+dependencies {
+    testImplementation 'junit:junit:4.13.2'
 }

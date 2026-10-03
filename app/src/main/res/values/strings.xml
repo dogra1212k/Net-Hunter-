@@ -36,6 +36,10 @@
     <string name="notes_format">Notes: %1$d</string>
     <string name="show_notes_only">Show notes only</string>
     <string name="show_all_notes">Show all notes</string>
+    <string name="show_incomplete_only">Show incomplete only</string>
+    <string name="show_all_progress">Show all lessons</string>
+    <string name="visible_lessons_format">Visible lessons: %1$d/%2$d</string>
+    <string name="clear_filters">Clear filters</string>
     <string name="mark_complete">Mark complete</string>
     <string name="completed">✓ Completed</string>
     <string name="add_favorite">☆ Add to favorites</string>
@@ -61,6 +65,14 @@
     <string name="next_lesson">Next →</string>
     <string name="previous_lesson_format">← %1$s</string>
     <string name="next_lesson_format">%1$s →</string>
+    <string name="text_size">Lesson text size</string>
+    <string name="text_smaller">A−</string>
+    <string name="text_larger">A+</string>
+    <string name="copy_lesson">Copy lesson</string>
+    <string name="share_lesson">Share lesson</string>
+    <string name="lesson_copied">Lesson copied</string>
+    <string name="copy_failed">Could not copy lesson</string>
+    <string name="share_lesson_chooser">Share lesson with</string>
     <string name="safety">Authorized labs • your own devices • localhost</string>
     <string name="quiz_feedback_format">%1$s\nCorrect answer: %2$s\n\n%3$s</string>
     <string name="quiz_explain_pwd">pwd prints the path of your current working directory.</string>

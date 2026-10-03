@@ -2,11 +2,16 @@ package com.dogra.nethunterguide;
 
 import android.app.Activity;
 import android.content.SharedPreferences;
+import android.content.ClipData;
+import android.content.ClipboardManager;
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.ScrollView;
 import android.widget.Toast;
 
 import java.io.BufferedReader;
@@ -21,6 +26,10 @@ public class LessonActivity extends Activity {
     private static final String PREFS_NAME = "lesson_state";
     private static final String PREF_LAST_TITLE = "last_title";
     private static final String PREF_LAST_ASSET = "last_asset";
+    private static final String PREF_TEXT_SIZE = "lesson_text_size";
+    private static final float DEFAULT_TEXT_SIZE = 14f;
+    private static final float MIN_TEXT_SIZE = 12f;
+    private static final float MAX_TEXT_SIZE = 24f;
 
     private String lessonTitle;
     private String assetName;
@@ -31,6 +40,8 @@ public class LessonActivity extends Activity {
     private EditText noteInput;
     private TextView titleView;
     private TextView contentView;
+    private ScrollView lessonScroll;
+    private float lessonTextSize;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,14 +54,23 @@ public class LessonActivity extends Activity {
         previousButton = findViewById(R.id.btn_previous_lesson);
         nextButton = findViewById(R.id.btn_next_lesson);
         Button saveNoteButton = findViewById(R.id.btn_save_note);
+        Button decreaseTextButton = findViewById(R.id.btn_text_smaller);
+        Button increaseTextButton = findViewById(R.id.btn_text_larger);
+        Button copyLessonButton = findViewById(R.id.btn_copy_lesson);
+        Button shareLessonButton = findViewById(R.id.btn_share_lesson);
         titleView = findViewById(R.id.lesson_title);
         contentView = findViewById(R.id.lesson_content);
+        lessonScroll = findViewById(R.id.lesson_scroll);
         noteInput = findViewById(R.id.lesson_note);
 
         backButton.setOnClickListener(v -> finish());
 
         lessonTitle = getIntent().getStringExtra(EXTRA_TITLE);
         assetName = getIntent().getStringExtra(EXTRA_ASSET);
+
+        lessonTextSize = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
+                .getFloat(PREF_TEXT_SIZE, DEFAULT_TEXT_SIZE);
+        applyTextSize();
 
         showCurrentLesson();
 
@@ -59,6 +79,10 @@ public class LessonActivity extends Activity {
         saveNoteButton.setOnClickListener(v -> saveNote());
         previousButton.setOnClickListener(v -> moveLesson(-1));
         nextButton.setOnClickListener(v -> moveLesson(1));
+        decreaseTextButton.setOnClickListener(v -> changeTextSize(-1f));
+        increaseTextButton.setOnClickListener(v -> changeTextSize(1f));
+        copyLessonButton.setOnClickListener(v -> copyLesson());
+        shareLessonButton.setOnClickListener(v -> shareLesson());
     }
 
     @Override
@@ -66,6 +90,7 @@ public class LessonActivity extends Activity {
         super.onPause();
         if (assetName != null && noteInput != null) {
             persistNote(noteInput.getText().toString());
+            persistScrollPosition();
         }
     }
 
@@ -78,10 +103,12 @@ public class LessonActivity extends Activity {
         loadNote();
         updateNavigationButtons();
         rememberCurrentLesson();
+        restoreScrollPosition();
     }
 
     private void moveLesson(int direction) {
         persistNote(noteInput.getText().toString());
+        persistScrollPosition();
 
         int currentIndex = LessonCatalog.indexOfAsset(assetName);
         int nextIndex = currentIndex + direction;
@@ -129,6 +156,86 @@ public class LessonActivity extends Activity {
                 .putString(PREF_LAST_TITLE, lessonTitle)
                 .putString(PREF_LAST_ASSET, assetName)
                 .apply();
+    }
+
+    private void persistScrollPosition() {
+        if (assetName == null || lessonScroll == null) {
+            return;
+        }
+
+        getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
+                .edit()
+                .putInt("scroll_" + assetName, lessonScroll.getScrollY())
+                .apply();
+    }
+
+    private void restoreScrollPosition() {
+        if (assetName == null || lessonScroll == null) {
+            return;
+        }
+
+        int savedY = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
+                .getInt("scroll_" + assetName, 0);
+
+        lessonScroll.post(() -> lessonScroll.scrollTo(0, Math.max(savedY, 0)));
+    }
+
+    private String buildLessonShareText() {
+        String title = lessonTitle == null ? getString(R.string.app_name) : lessonTitle;
+        return title + "\n\n" + contentView.getText().toString();
+    }
+
+    private void copyLesson() {
+        ClipboardManager clipboard =
+                (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+        if (clipboard == null) {
+            Toast.makeText(this, R.string.copy_failed, Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        clipboard.setPrimaryClip(
+                ClipData.newPlainText(
+                        lessonTitle == null ? getString(R.string.app_name) : lessonTitle,
+                        buildLessonShareText()
+                )
+        );
+        Toast.makeText(this, R.string.lesson_copied, Toast.LENGTH_SHORT).show();
+    }
+
+    private void shareLesson() {
+        Intent shareIntent = new Intent(Intent.ACTION_SEND);
+        shareIntent.setType("text/plain");
+        shareIntent.putExtra(Intent.EXTRA_SUBJECT,
+                lessonTitle == null ? getString(R.string.app_name) : lessonTitle);
+        shareIntent.putExtra(Intent.EXTRA_TEXT, buildLessonShareText());
+
+        startActivity(Intent.createChooser(
+                shareIntent,
+                getString(R.string.share_lesson_chooser)
+        ));
+    }
+
+    private void changeTextSize(float delta) {
+        lessonTextSize = Math.max(
+                MIN_TEXT_SIZE,
+                Math.min(MAX_TEXT_SIZE, lessonTextSize + delta)
+        );
+
+        getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
+                .edit()
+                .putFloat(PREF_TEXT_SIZE, lessonTextSize)
+                .apply();
+
+        applyTextSize();
+    }
+
+    private void applyTextSize() {
+        if (contentView != null) {
+            contentView.setTextSize(lessonTextSize);
+        }
+        if (noteInput != null) {
+            noteInput.setTextSize(Math.max(14f, lessonTextSize));
+        }
     }
 
     private void toggleComplete() {

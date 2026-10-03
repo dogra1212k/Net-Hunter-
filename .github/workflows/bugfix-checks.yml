@@ -22,4 +22,4 @@ jobs:
         with:
           gradle-version: '9.6.0'
       - name: Android lint and debug build
-        run: gradle :app:lintDebug :app:assembleDebug
+        run: gradle :app:testDebugUnitTest :app:lintDebug :app:assembleDebug
