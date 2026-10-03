@@ -28,6 +28,8 @@ public class MainActivity extends Activity {
     private static final String PREF_LAST_ASSET = "last_asset";
     private static final int REQ_EXPORT_BACKUP = 1001;
     private static final int REQ_IMPORT_BACKUP = 1002;
+    private static final int BACKUP_FORMAT_VERSION = 1;
+    private static final int MAX_BACKUP_CHARS = 1_000_000;
 
     private final List<Button> lessonButtons = new ArrayList<>();
     private final List<String> lessonAssets = new ArrayList<>();
@@ -267,7 +269,7 @@ public class MainActivity extends Activity {
             SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
             JSONObject root = new JSONObject();
             root.put("format", "net-hunter-backup");
-            root.put("version", 1);
+            root.put("version", BACKUP_FORMAT_VERSION);
 
             JSONObject values = new JSONObject();
             for (Map.Entry<String, ?> entry : prefs.getAll().entrySet()) {
@@ -304,44 +306,82 @@ public class MainActivity extends Activity {
                     new java.io.InputStreamReader(
                             getContentResolver().openInputStream(uri),
                             java.nio.charset.StandardCharsets.UTF_8))) {
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    text.append(line);
+                char[] buffer = new char[4096];
+                int read;
+                while ((read = reader.read(buffer)) != -1) {
+                    text.append(buffer, 0, read);
+                    if (text.length() > MAX_BACKUP_CHARS) {
+                        throw new IllegalArgumentException("Backup file is too large.");
+                    }
                 }
             }
 
             JSONObject root = new JSONObject(text.toString());
-            if (!"net-hunter-backup".equals(root.optString("format"))) {
+            if (!"net-hunter-backup".equals(root.optString("format"))
+                    || root.optInt("version", -1) != BACKUP_FORMAT_VERSION) {
                 throw new IllegalArgumentException("Unsupported backup format.");
             }
 
             JSONObject values = root.getJSONObject("preferences");
             SharedPreferences.Editor editor =
-                    getSharedPreferences(PREFS_NAME, MODE_PRIVATE).edit();
+                    getSharedPreferences(PREFS_NAME, MODE_PRIVATE).edit().clear();
+
+            String restoredLastAsset = null;
 
             java.util.Iterator<String> keys = values.keys();
             while (keys.hasNext()) {
                 String key = keys.next();
                 Object value = values.get(key);
 
-                if (value instanceof Boolean) {
-                    editor.putBoolean(key, (Boolean) value);
-                } else if (value instanceof Integer) {
-                    editor.putInt(key, (Integer) value);
-                } else if (value instanceof Long) {
-                    editor.putLong(key, (Long) value);
-                } else if (value instanceof Double) {
-                    double number = (Double) value;
-                    if (number == Math.rint(number)
-                            && number >= Integer.MIN_VALUE
-                            && number <= Integer.MAX_VALUE) {
-                        editor.putInt(key, (int) number);
-                    } else {
-                        editor.putFloat(key, (float) number);
+                if (PREF_LAST_ASSET.equals(key) && value instanceof String) {
+                    String asset = (String) value;
+                    if (LessonCatalog.indexOfAsset(asset) >= 0) {
+                        restoredLastAsset = asset;
+                        editor.putString(PREF_LAST_ASSET, asset);
                     }
-                } else {
-                    editor.putString(key, String.valueOf(value));
+                    continue;
                 }
+
+                if (PREF_LAST_TITLE.equals(key)) {
+                    continue;
+                }
+
+                if ("lesson_text_size".equals(key) && value instanceof Number) {
+                    float size = ((Number) value).floatValue();
+                    size = Math.max(12f, Math.min(24f, size));
+                    editor.putFloat(key, size);
+                    continue;
+                }
+
+                if (("quiz_best_score".equals(key) || "quiz_last_score".equals(key))
+                        && value instanceof Number) {
+                    int score = Math.max(0, Math.min(5, ((Number) value).intValue()));
+                    editor.putInt(key, score);
+                    continue;
+                }
+
+                String asset = assetFromStateKey(key);
+                if (asset == null) {
+                    continue;
+                }
+
+                if (key.startsWith("completed_") || key.startsWith("favorite_")) {
+                    if (value instanceof Boolean) {
+                        editor.putBoolean(key, (Boolean) value);
+                    }
+                } else if (key.startsWith("scroll_") && value instanceof Number) {
+                    editor.putInt(key, Math.max(0, ((Number) value).intValue()));
+                } else if (key.startsWith("note_") && value instanceof String) {
+                    String note = (String) value;
+                    if (note.length() <= 100_000) {
+                        editor.putString(key, note);
+                    }
+                }
+            }
+
+            if (restoredLastAsset != null) {
+                int index = LessonCatalog.indexOfAsset(restoredLastAsset);
+                editor.putString(PREF_LAST_TITLE, LessonCatalog.TITLES[index]);
             }
 
             editor.apply();
@@ -350,6 +390,19 @@ public class MainActivity extends Activity {
         } catch (Exception e) {
             Toast.makeText(this, R.string.backup_import_failed, Toast.LENGTH_LONG).show();
         }
+    }
+
+    private String assetFromStateKey(String key) {
+        String[] prefixes = {"completed_", "favorite_", "scroll_", "note_"};
+
+        for (String prefix : prefixes) {
+            if (key.startsWith(prefix)) {
+                String asset = key.substring(prefix.length());
+                return LessonCatalog.indexOfAsset(asset) >= 0 ? asset : null;
+            }
+        }
+
+        return null;
     }
 
     private void refreshHomeState() {
@@ -380,6 +433,7 @@ public class MainActivity extends Activity {
         editor.apply();
         updateProgress();
         updateLessonButtonLabels();
+        applyFilters();
     }
 
     private void updateProgress() {
