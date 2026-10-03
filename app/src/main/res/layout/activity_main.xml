@@ -63,6 +63,23 @@
             android:text="@string/show_favorites_only"
             android:textAllCaps="false" />
 
+        <TextView
+            android:id="@+id/notes_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:gravity="center"
+            android:textColor="@color/text_primary"
+            android:textSize="14sp" />
+
+        <Button
+            android:id="@+id/btn_filter_notes"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/show_notes_only"
+            android:textAllCaps="false" />
+
         <Button
             android:id="@+id/btn_reset_progress"
             android:layout_width="wrap_content"
