@@ -17,6 +17,7 @@ Current app features:
 - home-screen ✓ completed and ★ favorite status markers;
 - per-lesson personal notes saved locally;
 - notes count plus show-notes-only filter on the home screen;
+- JSON backup/export and restore/import for local learning state;
 - home-screen progress counter;
 - confirmed progress reset;
 - Termux and Kali quick-start guidance;
@@ -33,7 +34,7 @@ Current app features:
 - quiz progress retained across screen rotation;
 - no browser required for offline lesson reading.
 
-Current app version: **1.8.0**
+Current app version: **1.9.0**
 Package: **com.dogra.nethunterguide**
 
 ## Download / Build
