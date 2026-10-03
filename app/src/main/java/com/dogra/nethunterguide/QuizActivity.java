@@ -6,7 +6,6 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
 
 public class QuizActivity extends Activity {
 
@@ -32,6 +31,13 @@ public class QuizActivity extends Activity {
 
     private final int[] correctAnswers = {0, 1, 2, 0, 0};
 
+    private final int[] explanations = {
+            R.string.quiz_explain_pwd, R.string.quiz_explain_localhost,
+            R.string.quiz_explain_http, R.string.quiz_explain_sockets,
+            R.string.quiz_explain_hash
+    };
+
+    private int selectedAnswer = -1;
     private int questionIndex = 0;
     private int score = 0;
     private boolean answered = false;
@@ -39,6 +45,7 @@ public class QuizActivity extends Activity {
     private TextView questionText;
     private TextView scoreText;
     private TextView historyText;
+    private TextView feedbackText;
     private Button[] optionButtons;
     private Button nextButton;
 
@@ -48,10 +55,11 @@ public class QuizActivity extends Activity {
         setContentView(R.layout.activity_quiz);
 
         Button backButton = findViewById(R.id.btn_quiz_back);
+        historyText = findViewById(R.id.quiz_history);
         questionText = findViewById(R.id.quiz_question);
         scoreText = findViewById(R.id.quiz_score);
-        historyText = findViewById(R.id.quiz_history);
         nextButton = findViewById(R.id.btn_quiz_next);
+        feedbackText = findViewById(R.id.quiz_feedback);
 
         optionButtons = new Button[]{
                 findViewById(R.id.btn_option_1),
@@ -69,18 +77,35 @@ public class QuizActivity extends Activity {
         }
 
         updateHistory();
+        if (savedInstanceState != null) {
+            questionIndex = savedInstanceState.getInt("question_index", 0);
+            score = savedInstanceState.getInt("score", 0);
+            selectedAnswer = savedInstanceState.getInt("selected_answer", -1);
+            answered = selectedAnswer >= 0;
+        }
         showQuestion();
     }
 
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        outState.putInt("question_index", questionIndex);
+        outState.putInt("score", score);
+        outState.putInt("selected_answer", selectedAnswer);
+        super.onSaveInstanceState(outState);
+    }
+
     private void showQuestion() {
-        answered = false;
         questionText.setText((questionIndex + 1) + ". " + questions[questionIndex]);
         scoreText.setText(getString(R.string.quiz_score, score, questions.length));
         nextButton.setVisibility(View.GONE);
+        feedbackText.setVisibility(View.GONE);
 
         for (int i = 0; i < optionButtons.length; i++) {
-            optionButtons[i].setEnabled(true);
+            optionButtons[i].setEnabled(!answered);
             optionButtons[i].setText(options[questionIndex][i]);
+        }
+        if (answered) {
+            showAnswerFeedback();
         }
     }
 
@@ -90,14 +115,24 @@ public class QuizActivity extends Activity {
         }
 
         answered = true;
-        boolean correct = selected == correctAnswers[questionIndex];
-        if (correct) {
+        selectedAnswer = selected;
+        if (selected == correctAnswers[questionIndex]) {
             score++;
-            Toast.makeText(this, R.string.quiz_correct, Toast.LENGTH_SHORT).show();
-        } else {
-            Toast.makeText(this, R.string.quiz_incorrect, Toast.LENGTH_SHORT).show();
         }
+        if (questionIndex == questions.length - 1) {
+            saveQuizResult();
+            updateHistory();
+        }
+        showAnswerFeedback();
+    }
 
+    private void showAnswerFeedback() {
+        int result = selectedAnswer == correctAnswers[questionIndex]
+                ? R.string.quiz_correct : R.string.quiz_incorrect;
+        feedbackText.setText(getString(R.string.quiz_feedback_format,
+                getString(result), options[questionIndex][correctAnswers[questionIndex]],
+                getString(explanations[questionIndex])));
+        feedbackText.setVisibility(View.VISIBLE);
         scoreText.setText(getString(R.string.quiz_score, score, questions.length));
         for (Button button : optionButtons) {
             button.setEnabled(false);
@@ -115,14 +150,14 @@ public class QuizActivity extends Activity {
         }
 
         if (questionIndex == questions.length - 1) {
-            saveQuizResult();
             questionIndex = 0;
             score = 0;
-            updateHistory();
         } else {
             questionIndex++;
         }
 
+        answered = false;
+        selectedAnswer = -1;
         showQuestion();
     }
 
