@@ -52,6 +52,9 @@ public class MainActivity extends Activity {
         bindLesson(R.id.btn_labs, "Practice Labs", "practice-labs.txt");
         bindLesson(R.id.btn_about, "About & Safety", "about-safety.txt");
 
+        Button quizButton = findViewById(R.id.btn_quiz);
+        quizButton.setOnClickListener(v -> startActivity(new Intent(this, QuizActivity.class)));
+
         continueButton = findViewById(R.id.btn_continue);
         progressText = findViewById(R.id.progress_text);
         favoritesText = findViewById(R.id.favorites_text);
