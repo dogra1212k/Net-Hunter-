@@ -27,6 +27,8 @@
     <string name="quiz_back">← Back to Net Hunter</string>
     <string name="quiz_correct">Correct</string>
     <string name="quiz_incorrect">Incorrect</string>
+    <string name="quiz_history">Last: %1$d/%2$d • Best: %3$d/%4$d</string>
+    <string name="quiz_history_empty">Last: not attempted • Best: %1$d/%2$d</string>
     <string name="search_hint">Search lessons</string>
     <string name="continue_lesson_format">Continue: %1$s</string>
     <string name="progress_format">Progress: %1$d/%2$d completed</string>
