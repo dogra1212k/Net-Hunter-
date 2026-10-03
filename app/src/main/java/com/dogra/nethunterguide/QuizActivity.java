@@ -1,6 +1,7 @@
 package com.dogra.nethunterguide;
 
 import android.app.Activity;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -8,6 +9,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 public class QuizActivity extends Activity {
+
+    private static final String PREFS_NAME = "lesson_state";
+    private static final String PREF_QUIZ_BEST = "quiz_best_score";
+    private static final String PREF_QUIZ_LAST = "quiz_last_score";
 
     private final String[] questions = {
             "Which command shows the current directory?",
@@ -33,6 +38,7 @@ public class QuizActivity extends Activity {
 
     private TextView questionText;
     private TextView scoreText;
+    private TextView historyText;
     private Button[] optionButtons;
     private Button nextButton;
 
@@ -44,6 +50,7 @@ public class QuizActivity extends Activity {
         Button backButton = findViewById(R.id.btn_quiz_back);
         questionText = findViewById(R.id.quiz_question);
         scoreText = findViewById(R.id.quiz_score);
+        historyText = findViewById(R.id.quiz_history);
         nextButton = findViewById(R.id.btn_quiz_next);
 
         optionButtons = new Button[]{
@@ -61,6 +68,7 @@ public class QuizActivity extends Activity {
             optionButtons[i].setOnClickListener(v -> answer(selected));
         }
 
+        updateHistory();
         showQuestion();
     }
 
@@ -107,12 +115,37 @@ public class QuizActivity extends Activity {
         }
 
         if (questionIndex == questions.length - 1) {
+            saveQuizResult();
             questionIndex = 0;
             score = 0;
+            updateHistory();
         } else {
             questionIndex++;
         }
 
         showQuestion();
+    }
+
+    private void saveQuizResult() {
+        SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        int best = prefs.getInt(PREF_QUIZ_BEST, 0);
+        int newBest = Math.max(best, score);
+
+        prefs.edit()
+                .putInt(PREF_QUIZ_LAST, score)
+                .putInt(PREF_QUIZ_BEST, newBest)
+                .apply();
+    }
+
+    private void updateHistory() {
+        SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        int last = prefs.getInt(PREF_QUIZ_LAST, -1);
+        int best = prefs.getInt(PREF_QUIZ_BEST, 0);
+
+        if (last < 0) {
+            historyText.setText(getString(R.string.quiz_history_empty, best, questions.length));
+        } else {
+            historyText.setText(getString(R.string.quiz_history, last, questions.length, best, questions.length));
+        }
     }
 }
