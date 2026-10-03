@@ -21,6 +21,9 @@ public class MainActivity extends Activity {
         bindLesson(R.id.btn_forensics, "Forensics Basics", "forensics-basics.txt");
         bindLesson(R.id.btn_roadmap, "Learning Roadmap", "learning-roadmap.txt");
         bindLesson(R.id.btn_categories, "Tool Categories", "tool-categories.txt");
+        bindLesson(R.id.btn_reference, "Command Reference", "command-reference.txt");
+        bindLesson(R.id.btn_troubleshooting, "Troubleshooting", "troubleshooting.txt");
+        bindLesson(R.id.btn_labs, "Practice Labs", "practice-labs.txt");
     }
 
     private void bindLesson(int buttonId, String title, String assetName) {
