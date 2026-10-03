@@ -17,7 +17,8 @@ Current app features:
 - home-screen ✓ completed and ★ favorite status markers;
 - per-lesson personal notes saved locally;
 - notes count plus show-notes-only filter on the home screen;
-- JSON backup/export and restore/import for local learning state;
+- validated JSON backup/export and restore/import for local learning state;
+- Android system/cloud backup disabled so local notes and progress stay under explicit user-controlled export/import;
 - home-screen progress counter;
 - show-incomplete-only lesson filter;
 - one-tap clear-filters control and visible lesson count;
@@ -40,7 +41,7 @@ Current app features:
 - quiz progress retained across screen rotation;
 - no browser required for offline lesson reading.
 
-Current app version: **2.5.0**
+Current app version: **2.6.0**
 Package: **com.dogra.nethunterguide**
 
 ## Download / Build
