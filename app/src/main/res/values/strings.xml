@@ -22,11 +22,16 @@
     <string name="search_hint">Search lessons</string>
     <string name="continue_lesson_format">Continue: %1$s</string>
     <string name="progress_format">Progress: %1$d/%2$d completed</string>
+    <string name="favorites_format">Favorites: %1$d</string>
+    <string name="show_favorites_only">Show favorites only</string>
+    <string name="show_all_lessons">Show all lessons</string>
     <string name="mark_complete">Mark complete</string>
     <string name="completed">✓ Completed</string>
+    <string name="add_favorite">☆ Add to favorites</string>
+    <string name="favorite_added">★ Favorite</string>
     <string name="reset_progress">Reset progress</string>
     <string name="reset_progress_title">Reset learning progress?</string>
-    <string name="reset_progress_message">This clears all completed lesson marks. Your last opened lesson will stay saved.</string>
+    <string name="reset_progress_message">This clears all completed lesson marks. Your last opened lesson and favorites will stay saved.</string>
     <string name="reset">Reset</string>
     <string name="cancel">Cancel</string>
     <string name="lesson_load_error">Lesson could not be loaded.</string>
