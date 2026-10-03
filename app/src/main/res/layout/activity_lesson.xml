@@ -18,6 +18,14 @@
             android:text="@string/back_to_home"
             android:textAllCaps="false" />
 
+        <Button
+            android:id="@+id/btn_complete"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="@string/mark_complete"
+            android:textAllCaps="false" />
+
         <TextView
             android:id="@+id/lesson_title"
             android:layout_width="match_parent"
