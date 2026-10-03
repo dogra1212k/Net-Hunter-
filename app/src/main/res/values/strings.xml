@@ -37,6 +37,10 @@
     <string name="completed">✓ Completed</string>
     <string name="add_favorite">☆ Add to favorites</string>
     <string name="favorite_added">★ Favorite</string>
+    <string name="personal_notes">Personal notes</string>
+    <string name="personal_notes_hint">Write your own notes for this lesson</string>
+    <string name="save_note">Save note</string>
+    <string name="note_saved">Note saved</string>
     <string name="reset_progress">Reset progress</string>
     <string name="reset_progress_title">Reset learning progress?</string>
     <string name="reset_progress_message">This clears all completed lesson marks. Your last opened lesson and favorites will stay saved.</string>
