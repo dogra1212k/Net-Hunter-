@@ -1,0 +1,53 @@
+SAFE PRACTICE LABS
+==================
+
+LAB 1 - Linux files
+Goal: create, copy, rename and remove your own test files.
+
+mkdir lab
+cd lab
+touch notes.txt
+cp notes.txt copy.txt
+mv copy.txt archive.txt
+ls -la
+rm archive.txt
+
+LAB 2 - Local web server
+Goal: understand client/server basics on localhost.
+
+Terminal 1:
+  mkdir web-lab
+  cd web-lab
+  echo hello > index.html
+  python3 -m http.server 8000
+
+Terminal 2:
+  curl http://127.0.0.1:8000
+  curl -I http://127.0.0.1:8000
+
+LAB 3 - Local ports
+With the local web server running:
+  ss -tulpn
+  nmap 127.0.0.1
+
+Observe which port is open and which process owns it.
+
+LAB 4 - DNS basics
+Use a public documentation/test domain:
+  dig example.com
+  dig example.com A
+
+Read the answer section and TTL values.
+
+LAB 5 - File forensics
+Create or use your own sample file:
+  file sample.bin
+  strings sample.bin | less
+  sha256sum sample.bin
+
+If it is an image:
+  exiftool photo.jpg
+
+RULES
+Use localhost, your own files, your own devices, or systems where you have explicit permission.
+Write down what each command did and what output you observed.
