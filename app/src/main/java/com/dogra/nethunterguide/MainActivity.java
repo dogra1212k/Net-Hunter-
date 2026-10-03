@@ -19,6 +19,8 @@ public class MainActivity extends Activity {
         bindLesson(R.id.btn_network, "Network Basics", "network-basics.txt");
         bindLesson(R.id.btn_web, "Web Basics", "web-basics.txt");
         bindLesson(R.id.btn_forensics, "Forensics Basics", "forensics-basics.txt");
+        bindLesson(R.id.btn_roadmap, "Learning Roadmap", "learning-roadmap.txt");
+        bindLesson(R.id.btn_categories, "Tool Categories", "tool-categories.txt");
     }
 
     private void bindLesson(int buttonId, String title, String assetName) {
