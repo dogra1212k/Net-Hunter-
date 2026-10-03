@@ -36,11 +36,13 @@ public class MainActivity extends Activity {
     private Button continueButton;
     private Button favoritesFilterButton;
     private Button notesFilterButton;
+    private Button incompleteFilterButton;
     private TextView progressText;
     private TextView favoritesText;
     private TextView notesText;
     private boolean favoritesOnly = false;
     private boolean notesOnly = false;
+    private boolean incompleteOnly = false;
     private String currentQuery = "";
 
     @Override
@@ -77,6 +79,7 @@ public class MainActivity extends Activity {
         notesText = findViewById(R.id.notes_text);
         favoritesFilterButton = findViewById(R.id.btn_filter_favorites);
         notesFilterButton = findViewById(R.id.btn_filter_notes);
+        incompleteFilterButton = findViewById(R.id.btn_filter_incomplete);
 
         Button resetProgressButton = findViewById(R.id.btn_reset_progress);
         Button exportBackupButton = findViewById(R.id.btn_export_backup);
@@ -98,10 +101,17 @@ public class MainActivity extends Activity {
             applyFilters();
         });
 
+        incompleteFilterButton.setOnClickListener(v -> {
+            incompleteOnly = !incompleteOnly;
+            updateIncompleteUi();
+            applyFilters();
+        });
+
         updateContinueButton();
         updateProgress();
         updateFavoritesUi();
         updateNotesUi();
+        updateIncompleteUi();
         updateLessonButtonLabels();
 
         TextView appMeta = findViewById(R.id.app_meta);
@@ -188,8 +198,12 @@ public class MainActivity extends Activity {
         if (notesText != null && notesFilterButton != null) {
             updateNotesUi();
         }
+        if (incompleteFilterButton != null) {
+            updateIncompleteUi();
+        }
         if (favoritesText != null && favoritesFilterButton != null
-                && notesText != null && notesFilterButton != null) {
+                && notesText != null && notesFilterButton != null
+                && incompleteFilterButton != null) {
             updateLessonButtonLabels();
             applyFilters();
         }
@@ -322,6 +336,7 @@ public class MainActivity extends Activity {
         updateProgress();
         updateFavoritesUi();
         updateNotesUi();
+        updateIncompleteUi();
         updateLessonButtonLabels();
         applyFilters();
     }
@@ -389,6 +404,12 @@ public class MainActivity extends Activity {
         );
     }
 
+    private void updateIncompleteUi() {
+        incompleteFilterButton.setText(
+                incompleteOnly ? R.string.show_all_progress : R.string.show_incomplete_only
+        );
+    }
+
     private void updateLessonButtonLabels() {
         SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
 
@@ -428,9 +449,11 @@ public class MainActivity extends Activity {
             String note = prefs.getString("note_" + asset, "");
             boolean hasNote = note != null && !note.trim().isEmpty();
             boolean matchesNote = !notesOnly || hasNote;
+            boolean completed = prefs.getBoolean("completed_" + asset, false);
+            boolean matchesIncomplete = !incompleteOnly || !completed;
 
             lessonButtons.get(i).setVisibility(
-                    matchesQuery && matchesFavorite && matchesNote
+                    matchesQuery && matchesFavorite && matchesNote && matchesIncomplete
                             ? View.VISIBLE
                             : View.GONE
             );
