@@ -23,7 +23,7 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      HAS_PLAY_KEY: ${{ secrets.PLAY_UPLOAD_KEYSTORE_B64 != '' && secrets.PLAY_UPLOAD_STORE_PASSWORD != '' && secrets.PLAY_UPLOAD_KEY_PASSWORD != '' }}
+      HAS_PLAY_KEY: "false"
 
     steps:
       - name: Checkout
@@ -40,51 +40,30 @@ jobs:
         with:
           gradle-version: "9.6.0"
 
-      - name: Validate Play signing secrets
+      - name: Prepare Play signing
         env:
           PLAY_UPLOAD_KEYSTORE_B64: ${{ secrets.PLAY_UPLOAD_KEYSTORE_B64 }}
           PLAY_UPLOAD_STORE_PASSWORD: ${{ secrets.PLAY_UPLOAD_STORE_PASSWORD }}
-          PLAY_UPLOAD_KEY_ALIAS: ${{ secrets.PLAY_UPLOAD_KEY_ALIAS }}
+          CONFIGURED_ALIAS: ${{ secrets.PLAY_UPLOAD_KEY_ALIAS }}
           PLAY_UPLOAD_KEY_PASSWORD: ${{ secrets.PLAY_UPLOAD_KEY_PASSWORD }}
         run: |
-          count=0
-          missing=""
+          signing_unavailable() {
+            echo "HAS_PLAY_KEY=false" >> "$GITHUB_ENV"
+            echo "::warning::$1 Signed release artifacts will not be produced in this run."
+            echo "Signing status: unavailable - $1" >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          }
 
-          if [ -n "$PLAY_UPLOAD_KEYSTORE_B64" ]; then
-            count=$((count + 1))
-          else
-            missing="$missing PLAY_UPLOAD_KEYSTORE_B64"
+          if [ -z "$PLAY_UPLOAD_KEYSTORE_B64" ]             && [ -z "$PLAY_UPLOAD_STORE_PASSWORD" ]             && [ -z "$PLAY_UPLOAD_KEY_PASSWORD" ]; then
+            echo "HAS_PLAY_KEY=false" >> "$GITHUB_ENV"
+            echo "Signing status: not configured" >> "$GITHUB_STEP_SUMMARY"
+            exit 0
           fi
 
-          if [ -n "$PLAY_UPLOAD_STORE_PASSWORD" ]; then
-            count=$((count + 1))
-          else
-            missing="$missing PLAY_UPLOAD_STORE_PASSWORD"
-          fi
+          [ -n "$PLAY_UPLOAD_KEYSTORE_B64" ] || signing_unavailable "Missing PLAY_UPLOAD_KEYSTORE_B64."
+          [ -n "$PLAY_UPLOAD_STORE_PASSWORD" ] || signing_unavailable "Missing PLAY_UPLOAD_STORE_PASSWORD."
+          [ -n "$PLAY_UPLOAD_KEY_PASSWORD" ] || signing_unavailable "Missing PLAY_UPLOAD_KEY_PASSWORD."
 
-          if [ -n "$PLAY_UPLOAD_KEY_PASSWORD" ]; then
-            count=$((count + 1))
-          else
-            missing="$missing PLAY_UPLOAD_KEY_PASSWORD"
-          fi
-
-          if [ "$count" -ne 0 ] && [ "$count" -ne 3 ]; then
-            echo "::error::Play signing is partially configured. Missing required secrets:$missing"
-            exit 1
-          fi
-
-          if [ -z "$PLAY_UPLOAD_KEY_ALIAS" ]; then
-            echo "PLAY_UPLOAD_KEY_ALIAS is not set; workflow will auto-detect it from a single-entry keystore."
-          fi
-
-      - name: Run Android lint
-        run: gradle :app:lint
-
-      - name: Restore Play upload keystore
-        if: env.HAS_PLAY_KEY == 'true'
-        env:
-          PLAY_UPLOAD_KEYSTORE_B64: ${{ secrets.PLAY_UPLOAD_KEYSTORE_B64 }}
-        run: |
           raw=$(printf '%s' "$PLAY_UPLOAD_KEYSTORE_B64" | tr -d '\r\n\t ')
           raw="${raw#PLAY_UPLOAD_KEYSTORE_B64=}"
           raw="${raw#data:application/octet-stream;base64,}"
@@ -99,19 +78,45 @@ jobs:
           elif [ "$remainder" -eq 3 ]; then
             raw="${raw}="
           elif [ "$remainder" -eq 1 ]; then
-            echo "::error::PLAY_UPLOAD_KEYSTORE_B64 has an invalid base64 length. Regenerate it with scripts/create-play-upload-key.sh."
-            exit 1
+            signing_unavailable "PLAY_UPLOAD_KEYSTORE_B64 has an invalid base64 length."
           fi
 
-          if ! printf '%s' "$raw" | base64 --decode > "$RUNNER_TEMP/net-hunter-upload.jks"; then
-            echo "::error::PLAY_UPLOAD_KEYSTORE_B64 is not valid base64. Regenerate it with scripts/create-play-upload-key.sh."
-            exit 1
+          KEYSTORE="$RUNNER_TEMP/net-hunter-upload.jks"
+          if ! printf '%s' "$raw" | base64 --decode > "$KEYSTORE"; then
+            signing_unavailable "PLAY_UPLOAD_KEYSTORE_B64 is not valid base64."
           fi
 
-          if [ ! -s "$RUNNER_TEMP/net-hunter-upload.jks" ]; then
-            echo "::error::Decoded Play upload keystore is empty."
-            exit 1
+          [ -s "$KEYSTORE" ] || signing_unavailable "Decoded Play upload keystore is empty."
+
+          if ! keytool -list -keystore "$KEYSTORE" -storepass "$PLAY_UPLOAD_STORE_PASSWORD" >/dev/null 2>&1; then
+            signing_unavailable "Decoded keystore could not be opened with PLAY_UPLOAD_STORE_PASSWORD."
           fi
+
+          if [ -n "$CONFIGURED_ALIAS" ]; then
+            alias_name="$CONFIGURED_ALIAS"
+          else
+            mapfile -t aliases < <(
+              keytool -list -v                 -keystore "$KEYSTORE"                 -storepass "$PLAY_UPLOAD_STORE_PASSWORD"               | sed -n 's/^Alias name: //p'
+            )
+
+            if [ "${#aliases[@]}" -ne 1 ]; then
+              signing_unavailable "A single key alias could not be auto-detected. Configure PLAY_UPLOAD_KEY_ALIAS."
+            fi
+
+            alias_name="${aliases[0]}"
+          fi
+
+          if ! keytool -list             -keystore "$KEYSTORE"             -storepass "$PLAY_UPLOAD_STORE_PASSWORD"             -alias "$alias_name" >/dev/null 2>&1; then
+            signing_unavailable "The configured or detected upload-key alias was not found."
+          fi
+
+          echo "HAS_PLAY_KEY=true" >> "$GITHUB_ENV"
+          echo "PLAY_UPLOAD_KEYSTORE=$KEYSTORE" >> "$GITHUB_ENV"
+          echo "PLAY_UPLOAD_KEY_ALIAS=$alias_name" >> "$GITHUB_ENV"
+          echo "Signing status: ready (alias: $alias_name)" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Run Android lint
+        run: gradle :app:lint
 
       - name: Build installable debug APK
         if: env.HAS_PLAY_KEY != 'true'
@@ -121,43 +126,9 @@ jobs:
         if: env.HAS_PLAY_KEY != 'true'
         run: gradle :app:bundleRelease
 
-      - name: Resolve Play upload key alias
-        if: env.HAS_PLAY_KEY == 'true'
-        env:
-          PLAY_UPLOAD_KEYSTORE: ${{ runner.temp }}/net-hunter-upload.jks
-          PLAY_UPLOAD_STORE_PASSWORD: ${{ secrets.PLAY_UPLOAD_STORE_PASSWORD }}
-          CONFIGURED_ALIAS: ${{ secrets.PLAY_UPLOAD_KEY_ALIAS }}
-        run: |
-          if [ -n "$CONFIGURED_ALIAS" ]; then
-            alias_name="$CONFIGURED_ALIAS"
-          else
-            mapfile -t aliases < <(
-              keytool -list -v                 -keystore "$PLAY_UPLOAD_KEYSTORE"                 -storepass "$PLAY_UPLOAD_STORE_PASSWORD"               | sed -n 's/^Alias name: //p'
-            )
-
-            if [ "${#aliases[@]}" -ne 1 ]; then
-              echo "::error::Could not safely auto-detect a single key alias. Configure PLAY_UPLOAD_KEY_ALIAS."
-              exit 1
-            fi
-
-            alias_name="${aliases[0]}"
-          fi
-
-          echo "PLAY_UPLOAD_KEY_ALIAS=$alias_name" >> "$GITHUB_ENV"
-          echo "Using Play upload key alias: $alias_name"
-
-      - name: Verify Play upload keystore
-        if: env.HAS_PLAY_KEY == 'true'
-        env:
-          PLAY_UPLOAD_KEYSTORE: ${{ runner.temp }}/net-hunter-upload.jks
-          PLAY_UPLOAD_STORE_PASSWORD: ${{ secrets.PLAY_UPLOAD_STORE_PASSWORD }}
-        run: |
-          keytool -list             -keystore "$PLAY_UPLOAD_KEYSTORE"             -storepass "$PLAY_UPLOAD_STORE_PASSWORD"             -alias "$PLAY_UPLOAD_KEY_ALIAS" >/dev/null
-
       - name: Build signed release APK and AAB
         if: env.HAS_PLAY_KEY == 'true'
         env:
-          PLAY_UPLOAD_KEYSTORE: ${{ runner.temp }}/net-hunter-upload.jks
           PLAY_UPLOAD_STORE_PASSWORD: ${{ secrets.PLAY_UPLOAD_STORE_PASSWORD }}
           PLAY_UPLOAD_KEY_PASSWORD: ${{ secrets.PLAY_UPLOAD_KEY_PASSWORD }}
         run: |
@@ -172,6 +143,7 @@ jobs:
           else
             APK_PATH="app/build/outputs/apk/debug/app-debug.apk"
           fi
+
           cp "$APK_PATH" "dist/Net-Hunter-Guide-${GITHUB_RUN_NUMBER}.apk"
           cp app/build/outputs/bundle/release/app-release.aab "dist/Net-Hunter-Guide-${GITHUB_RUN_NUMBER}.aab"
 
@@ -196,9 +168,11 @@ jobs:
         run: |
           APP_VERSION=$(sed -n 's/.*versionName "\(.*\)".*/\1/p' app/build.gradle | head -n 1)
           TAG="v${APP_VERSION}-build.${GITHUB_RUN_NUMBER}"
+
           if [ "$HAS_PLAY_KEY" = "true" ]; then
             NOTES="Signed release APK and signed AAB for Net Hunter Guide ${APP_VERSION}."
           else
-            NOTES="Installable debug APK plus unsigned release AAB for Net Hunter Guide ${APP_VERSION}. Configure Play upload-key secrets before production Play Store submission."
+            NOTES="Installable debug APK plus unsigned release AAB for Net Hunter Guide ${APP_VERSION}. Play signing is not currently valid/configured."
           fi
-          gh release create "$TAG" dist/*.apk dist/*.aab --title "Net Hunter Guide ${APP_VERSION}" --notes "$NOTES"
+
+          gh release create "$TAG" dist/*.apk dist/*.aab             --title "Net Hunter Guide ${APP_VERSION}"             --notes "$NOTES"
