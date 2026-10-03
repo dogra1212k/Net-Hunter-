@@ -2,6 +2,7 @@ package com.dogra.nethunterguide;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.widget.Button;
 import android.widget.TextView;
 
 import java.io.BufferedReader;
@@ -18,8 +19,11 @@ public class LessonActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_lesson);
 
+        Button backButton = findViewById(R.id.btn_back);
         TextView title = findViewById(R.id.lesson_title);
         TextView content = findViewById(R.id.lesson_content);
+
+        backButton.setOnClickListener(v -> finish());
 
         String lessonTitle = getIntent().getStringExtra(EXTRA_TITLE);
         String assetName = getIntent().getStringExtra(EXTRA_ASSET);
