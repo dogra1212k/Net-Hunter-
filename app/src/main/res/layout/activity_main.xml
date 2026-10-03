@@ -71,6 +71,38 @@
             android:text="@string/open_tools_guide"
             android:textAllCaps="false" />
 
+        <Button
+            android:id="@+id/btn_linux"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:text="@string/open_linux_basics"
+            android:textAllCaps="false" />
+
+        <Button
+            android:id="@+id/btn_network"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:text="@string/open_network_basics"
+            android:textAllCaps="false" />
+
+        <Button
+            android:id="@+id/btn_web"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:text="@string/open_web_basics"
+            android:textAllCaps="false" />
+
+        <Button
+            android:id="@+id/btn_forensics"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:text="@string/open_forensics_basics"
+            android:textAllCaps="false" />
+
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
