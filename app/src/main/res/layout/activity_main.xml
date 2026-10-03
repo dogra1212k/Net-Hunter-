@@ -81,6 +81,22 @@
             android:textAllCaps="false" />
 
         <Button
+            android:id="@+id/btn_export_backup"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/export_backup"
+            android:textAllCaps="false" />
+
+        <Button
+            android:id="@+id/btn_import_backup"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/import_backup"
+            android:textAllCaps="false" />
+
+        <Button
             android:id="@+id/btn_reset_progress"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
