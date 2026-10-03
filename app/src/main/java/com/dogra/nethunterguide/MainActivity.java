@@ -28,9 +28,12 @@ public class MainActivity extends Activity {
 
     private Button continueButton;
     private Button favoritesFilterButton;
+    private Button notesFilterButton;
     private TextView progressText;
     private TextView favoritesText;
+    private TextView notesText;
     private boolean favoritesOnly = false;
+    private boolean notesOnly = false;
     private String currentQuery = "";
 
     @Override
@@ -58,7 +61,9 @@ public class MainActivity extends Activity {
         continueButton = findViewById(R.id.btn_continue);
         progressText = findViewById(R.id.progress_text);
         favoritesText = findViewById(R.id.favorites_text);
+        notesText = findViewById(R.id.notes_text);
         favoritesFilterButton = findViewById(R.id.btn_filter_favorites);
+        notesFilterButton = findViewById(R.id.btn_filter_notes);
 
         Button resetProgressButton = findViewById(R.id.btn_reset_progress);
         resetProgressButton.setOnClickListener(v -> confirmResetProgress());
@@ -69,9 +74,16 @@ public class MainActivity extends Activity {
             applyFilters();
         });
 
+        notesFilterButton.setOnClickListener(v -> {
+            notesOnly = !notesOnly;
+            updateNotesUi();
+            applyFilters();
+        });
+
         updateContinueButton();
         updateProgress();
         updateFavoritesUi();
+        updateNotesUi();
         updateLessonButtonLabels();
 
         TextView appMeta = findViewById(R.id.app_meta);
@@ -154,6 +166,12 @@ public class MainActivity extends Activity {
         }
         if (favoritesText != null && favoritesFilterButton != null) {
             updateFavoritesUi();
+        }
+        if (notesText != null && notesFilterButton != null) {
+            updateNotesUi();
+        }
+        if (favoritesText != null && favoritesFilterButton != null
+                && notesText != null && notesFilterButton != null) {
             updateLessonButtonLabels();
             applyFilters();
         }
@@ -205,6 +223,23 @@ public class MainActivity extends Activity {
         );
     }
 
+    private void updateNotesUi() {
+        SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        int notes = 0;
+
+        for (String asset : lessonAssets) {
+            String note = prefs.getString("note_" + asset, "");
+            if (note != null && !note.trim().isEmpty()) {
+                notes++;
+            }
+        }
+
+        notesText.setText(getString(R.string.notes_format, notes));
+        notesFilterButton.setText(
+                notesOnly ? R.string.show_all_notes : R.string.show_notes_only
+        );
+    }
+
     private void updateLessonButtonLabels() {
         SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
 
@@ -241,8 +276,14 @@ public class MainActivity extends Activity {
             boolean matchesFavorite = !favoritesOnly
                     || prefs.getBoolean("favorite_" + asset, false);
 
+            String note = prefs.getString("note_" + asset, "");
+            boolean hasNote = note != null && !note.trim().isEmpty();
+            boolean matchesNote = !notesOnly || hasNote;
+
             lessonButtons.get(i).setVisibility(
-                    matchesQuery && matchesFavorite ? View.VISIBLE : View.GONE
+                    matchesQuery && matchesFavorite && matchesNote
+                            ? View.VISIBLE
+                            : View.GONE
             );
         }
     }
