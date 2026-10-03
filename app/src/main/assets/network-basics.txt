@@ -1,0 +1,34 @@
+NETWORK BASICS
+==============
+
+Practice only on localhost, your own devices, or systems you are explicitly authorized to test.
+
+1) Interfaces and addresses
+ip addr
+  Show network interfaces and assigned IP addresses.
+
+ip route
+  Show routing information.
+
+2) Local connectivity
+ping 127.0.0.1
+  Test the local TCP/IP stack.
+
+3) Listening services
+ss -tulpn
+  Show listening TCP/UDP ports and related processes.
+
+4) Safe local web lab
+python3 -m http.server 8000
+  Start a web server in the current directory.
+
+curl -I http://127.0.0.1:8000
+  Request response headers from your local server.
+
+5) Local service discovery
+nmap 127.0.0.1
+nmap -sV 127.0.0.1
+  Scan only your own localhost in this lesson.
+
+Learn these ideas:
+IP address, subnet, default gateway, DNS, TCP, UDP, port, client, server, request, response.
