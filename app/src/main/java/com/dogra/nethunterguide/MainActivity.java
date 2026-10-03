@@ -30,6 +30,10 @@ public class MainActivity extends Activity {
     private static final int REQ_IMPORT_BACKUP = 1002;
     private static final int BACKUP_FORMAT_VERSION = 1;
     private static final int MAX_BACKUP_CHARS = 1_000_000;
+    private static final String STATE_QUERY = "state_query";
+    private static final String STATE_FAVORITES_ONLY = "state_favorites_only";
+    private static final String STATE_NOTES_ONLY = "state_notes_only";
+    private static final String STATE_INCOMPLETE_ONLY = "state_incomplete_only";
 
     private final List<Button> lessonButtons = new ArrayList<>();
     private final List<String> lessonAssets = new ArrayList<>();
@@ -85,6 +89,14 @@ public class MainActivity extends Activity {
         favoritesFilterButton = findViewById(R.id.btn_filter_favorites);
         notesFilterButton = findViewById(R.id.btn_filter_notes);
         incompleteFilterButton = findViewById(R.id.btn_filter_incomplete);
+        searchInput = findViewById(R.id.search_lessons);
+
+        if (savedInstanceState != null) {
+            currentQuery = savedInstanceState.getString(STATE_QUERY, "");
+            favoritesOnly = savedInstanceState.getBoolean(STATE_FAVORITES_ONLY, false);
+            notesOnly = savedInstanceState.getBoolean(STATE_NOTES_ONLY, false);
+            incompleteOnly = savedInstanceState.getBoolean(STATE_INCOMPLETE_ONLY, false);
+        }
 
         Button resetProgressButton = findViewById(R.id.btn_reset_progress);
         Button exportBackupButton = findViewById(R.id.btn_export_backup);
@@ -124,7 +136,6 @@ public class MainActivity extends Activity {
         TextView appMeta = findViewById(R.id.app_meta);
         appMeta.setText(getString(R.string.app_meta_format, getAppVersionName(), lessonButtons.size()));
 
-        searchInput = findViewById(R.id.search_lessons);
         searchInput.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
@@ -138,6 +149,22 @@ public class MainActivity extends Activity {
             @Override
             public void afterTextChanged(Editable s) { }
         });
+
+        if (!currentQuery.isEmpty()) {
+            searchInput.setText(currentQuery);
+            searchInput.setSelection(searchInput.length());
+        } else {
+            applyFilters();
+        }
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        outState.putString(STATE_QUERY, currentQuery);
+        outState.putBoolean(STATE_FAVORITES_ONLY, favoritesOnly);
+        outState.putBoolean(STATE_NOTES_ONLY, notesOnly);
+        outState.putBoolean(STATE_INCOMPLETE_ONLY, incompleteOnly);
+        super.onSaveInstanceState(outState);
     }
 
     private String getAppVersionName() {
