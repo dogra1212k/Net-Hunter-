@@ -1,6 +1,7 @@
 package com.dogra.nethunterguide;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -47,6 +48,9 @@ public class MainActivity extends Activity {
 
         continueButton = findViewById(R.id.btn_continue);
         progressText = findViewById(R.id.progress_text);
+        Button resetProgressButton = findViewById(R.id.btn_reset_progress);
+        resetProgressButton.setOnClickListener(v -> confirmResetProgress());
+
         updateContinueButton();
         updateProgress();
 
@@ -127,6 +131,25 @@ public class MainActivity extends Activity {
         if (continueButton != null) {
             updateContinueButton();
         }
+    }
+
+    private void confirmResetProgress() {
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.reset_progress_title)
+                .setMessage(R.string.reset_progress_message)
+                .setNegativeButton(R.string.cancel, null)
+                .setPositiveButton(R.string.reset, (dialog, which) -> resetProgress())
+                .show();
+    }
+
+    private void resetProgress() {
+        SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        SharedPreferences.Editor editor = prefs.edit();
+        for (String asset : lessonAssets) {
+            editor.remove("completed_" + asset);
+        }
+        editor.apply();
+        updateProgress();
     }
 
     private void updateProgress() {
