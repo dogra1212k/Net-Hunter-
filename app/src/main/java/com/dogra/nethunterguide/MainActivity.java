@@ -2,6 +2,7 @@ package com.dogra.nethunterguide;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -16,7 +17,12 @@ import java.util.Locale;
 
 public class MainActivity extends Activity {
 
+    private static final String PREFS_NAME = "lesson_state";
+    private static final String PREF_LAST_TITLE = "last_title";
+    private static final String PREF_LAST_ASSET = "last_asset";
+
     private final List<Button> lessonButtons = new ArrayList<>();
+    private Button continueButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,6 +42,9 @@ public class MainActivity extends Activity {
         bindLesson(R.id.btn_troubleshooting, "Troubleshooting", "troubleshooting.txt");
         bindLesson(R.id.btn_labs, "Practice Labs", "practice-labs.txt");
         bindLesson(R.id.btn_about, "About & Safety", "about-safety.txt");
+
+        continueButton = findViewById(R.id.btn_continue);
+        updateContinueButton();
 
         TextView appMeta = findViewById(R.id.app_meta);
         appMeta.setText(getString(R.string.app_meta_format, getAppVersionName(), lessonButtons.size()));
@@ -69,12 +78,39 @@ public class MainActivity extends Activity {
         Button button = findViewById(buttonId);
         button.setTag(title.toLowerCase(Locale.ROOT));
         lessonButtons.add(button);
-        button.setOnClickListener(v -> {
-            Intent intent = new Intent(this, LessonActivity.class);
-            intent.putExtra(LessonActivity.EXTRA_TITLE, title);
-            intent.putExtra(LessonActivity.EXTRA_ASSET, assetName);
-            startActivity(intent);
-        });
+        button.setOnClickListener(v -> openLesson(title, assetName, true));
+    }
+
+    private void openLesson(String title, String assetName, boolean remember) {
+        if (remember) {
+            getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
+                    .edit()
+                    .putString(PREF_LAST_TITLE, title)
+                    .putString(PREF_LAST_ASSET, assetName)
+                    .apply();
+            updateContinueButton();
+        }
+
+        Intent intent = new Intent(this, LessonActivity.class);
+        intent.putExtra(LessonActivity.EXTRA_TITLE, title);
+        intent.putExtra(LessonActivity.EXTRA_ASSET, assetName);
+        startActivity(intent);
+    }
+
+    private void updateContinueButton() {
+        SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        String title = prefs.getString(PREF_LAST_TITLE, null);
+        String asset = prefs.getString(PREF_LAST_ASSET, null);
+
+        if (title == null || asset == null) {
+            continueButton.setVisibility(View.GONE);
+            continueButton.setOnClickListener(null);
+            return;
+        }
+
+        continueButton.setText(getString(R.string.continue_lesson_format, title));
+        continueButton.setVisibility(View.VISIBLE);
+        continueButton.setOnClickListener(v -> openLesson(title, asset, false));
     }
 
     private void filterLessons(String query) {
