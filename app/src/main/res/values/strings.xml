@@ -21,6 +21,9 @@
     <string name="open_about_safety">About &amp; safety</string>
     <string name="search_hint">Search lessons</string>
     <string name="continue_lesson_format">Continue: %1$s</string>
+    <string name="progress_format">Progress: %1$d/%2$d completed</string>
+    <string name="mark_complete">Mark complete</string>
+    <string name="completed">✓ Completed</string>
     <string name="lesson_load_error">Lesson could not be loaded.</string>
     <string name="back_to_home">← Back to Net Hunter</string>
     <string name="safety">Authorized labs • your own devices • localhost</string>
