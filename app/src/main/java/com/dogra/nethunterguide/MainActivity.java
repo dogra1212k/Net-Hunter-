@@ -72,6 +72,7 @@ public class MainActivity extends Activity {
         updateContinueButton();
         updateProgress();
         updateFavoritesUi();
+        updateLessonButtonLabels();
 
         TextView appMeta = findViewById(R.id.app_meta);
         appMeta.setText(getString(R.string.app_meta_format, getAppVersionName(), lessonButtons.size()));
@@ -153,6 +154,7 @@ public class MainActivity extends Activity {
         }
         if (favoritesText != null && favoritesFilterButton != null) {
             updateFavoritesUi();
+            updateLessonButtonLabels();
             applyFilters();
         }
     }
@@ -174,6 +176,7 @@ public class MainActivity extends Activity {
         }
         editor.apply();
         updateProgress();
+        updateLessonButtonLabels();
     }
 
     private void updateProgress() {
@@ -200,6 +203,29 @@ public class MainActivity extends Activity {
         favoritesFilterButton.setText(
                 favoritesOnly ? R.string.show_all_lessons : R.string.show_favorites_only
         );
+    }
+
+    private void updateLessonButtonLabels() {
+        SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+
+        for (int i = 0; i < lessonButtons.size(); i++) {
+            String title = lessonTitles.get(i);
+            String asset = lessonAssets.get(i);
+
+            boolean completed = prefs.getBoolean("completed_" + asset, false);
+            boolean favorite = prefs.getBoolean("favorite_" + asset, false);
+
+            StringBuilder label = new StringBuilder();
+            if (completed) {
+                label.append("✓ ");
+            }
+            if (favorite) {
+                label.append("★ ");
+            }
+            label.append(title);
+
+            lessonButtons.get(i).setText(label.toString());
+        }
     }
 
     private void applyFilters() {
