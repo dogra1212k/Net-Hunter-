@@ -61,6 +61,9 @@
     <string name="next_lesson">Next →</string>
     <string name="previous_lesson_format">← %1$s</string>
     <string name="next_lesson_format">%1$s →</string>
+    <string name="text_size">Lesson text size</string>
+    <string name="text_smaller">A−</string>
+    <string name="text_larger">A+</string>
     <string name="safety">Authorized labs • your own devices • localhost</string>
     <string name="quiz_feedback_format">%1$s\nCorrect answer: %2$s\n\n%3$s</string>
     <string name="quiz_explain_pwd">pwd prints the path of your current working directory.</string>
