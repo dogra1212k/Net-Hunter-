@@ -22,6 +22,7 @@ Current app features:
 - home-screen progress counter;
 - show-incomplete-only lesson filter;
 - one-tap clear-filters control and visible lesson count;
+- home search/filter state retained across screen rotation;
 - confirmed progress reset;
 - Termux and Kali quick-start guidance;
 - Linux, networking, web/HTTP and forensics basics;
@@ -42,7 +43,7 @@ Current app features:
 - no browser required for offline lesson reading;
 - automated unit-test gate in CI for lesson catalog integrity.
 
-Current app version: **2.7.0**
+Current app version: **2.8.0**
 Package: **com.dogra.nethunterguide**
 
 ## Download / Build
