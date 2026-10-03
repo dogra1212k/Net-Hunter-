@@ -38,6 +38,8 @@
     <string name="show_all_notes">Show all notes</string>
     <string name="show_incomplete_only">Show incomplete only</string>
     <string name="show_all_progress">Show all lessons</string>
+    <string name="visible_lessons_format">Visible lessons: %1$d/%2$d</string>
+    <string name="clear_filters">Clear filters</string>
     <string name="mark_complete">Mark complete</string>
     <string name="completed">✓ Completed</string>
     <string name="add_favorite">☆ Add to favorites</string>
